@@ -8,21 +8,23 @@
 
 /* Begin PBXBuildFile section */
 		E46652B82A9463CB0048BA05 /* HackersApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46652B72A9463CB0048BA05 /* HackersApp.swift */; };
-		E46652BA2A9463CB0048BA05 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46652B92A9463CB0048BA05 /* ContentView.swift */; };
+		E46652BA2A9463CB0048BA05 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46652B92A9463CB0048BA05 /* MainTabView.swift */; };
 		E46652BC2A9463CE0048BA05 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E46652BB2A9463CE0048BA05 /* Assets.xcassets */; };
 		E46652C72A94686B0048BA05 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46652C62A94686B0048BA05 /* API.swift */; };
 		E46652CA2A9468E40048BA05 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = E46652C92A9468E40048BA05 /* Alamofire */; };
 		E46652CC2A94690B0048BA05 /* LicensesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46652CB2A94690B0048BA05 /* LicensesView.swift */; };
+		E46652CE2A9473720048BA05 /* StoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46652CD2A9473720048BA05 /* StoriesView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		E46652B42A9463CB0048BA05 /* Hackers.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Hackers.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E46652B72A9463CB0048BA05 /* HackersApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HackersApp.swift; sourceTree = "<group>"; };
-		E46652B92A9463CB0048BA05 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		E46652B92A9463CB0048BA05 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		E46652BB2A9463CE0048BA05 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E46652BD2A9463CE0048BA05 /* Hackers.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Hackers.entitlements; sourceTree = "<group>"; };
 		E46652C62A94686B0048BA05 /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
 		E46652CB2A94690B0048BA05 /* LicensesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicensesView.swift; sourceTree = "<group>"; };
+		E46652CD2A9473720048BA05 /* StoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoriesView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,7 +59,8 @@
 			isa = PBXGroup;
 			children = (
 				E46652B72A9463CB0048BA05 /* HackersApp.swift */,
-				E46652B92A9463CB0048BA05 /* ContentView.swift */,
+				E46652B92A9463CB0048BA05 /* MainTabView.swift */,
+				E46652CD2A9473720048BA05 /* StoriesView.swift */,
 				E46652CB2A94690B0048BA05 /* LicensesView.swift */,
 				E46652C62A94686B0048BA05 /* API.swift */,
 				E46652BB2A9463CE0048BA05 /* Assets.xcassets */,
@@ -141,7 +144,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E46652BA2A9463CB0048BA05 /* ContentView.swift in Sources */,
+				E46652BA2A9463CB0048BA05 /* MainTabView.swift in Sources */,
+				E46652CE2A9473720048BA05 /* StoriesView.swift in Sources */,
 				E46652C72A94686B0048BA05 /* API.swift in Sources */,
 				E46652CC2A94690B0048BA05 /* LicensesView.swift in Sources */,
 				E46652B82A9463CB0048BA05 /* HackersApp.swift in Sources */,

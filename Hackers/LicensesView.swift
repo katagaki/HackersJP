@@ -34,22 +34,25 @@ THE SOFTWARE.
 """]
 
     var body: some View {
-        List {
-            ForEach(0..<libraries.count) { index in
-                Section {
-                    Text(licenses[index])
-                        .font(.caption)
-                        .monospaced()
-                } header: {
-                    Text(libraries[index])
-                        .textCase(.none)
-                        .font(.headline)
-                        .bold()
-                        .foregroundStyle(.primary)
+        NavigationStack {
+            List {
+                ForEach(0..<libraries.count) { index in
+                    Section {
+                        Text(licenses[index])
+                            .font(.caption)
+                            .monospaced()
+                    } header: {
+                        Text(libraries[index])
+                            .textCase(.none)
+                            .font(.headline)
+                            .bold()
+                            .foregroundStyle(.primary)
+                    }
                 }
             }
+            .listStyle(.grouped)
+            .navigationTitle("著者権")
         }
-        .listStyle(.grouped)
     }
 }
 
