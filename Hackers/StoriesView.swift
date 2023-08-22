@@ -17,44 +17,26 @@ struct StoriesView: View {
         NavigationStack {
             List(stories, id: \.id, rowContent: { story in
                 if story.id != -1 {
-                    VStack(alignment: .leading, spacing: 2.0) {
+                    if let url = story.url {
+                        Link(destination: URL(string: url)!) {
+                            VStack(alignment: .leading, spacing: 2.0) {
+                                Text(story.title ?? "")
+                                    .font(.body)
+                                Text(story.url ?? "")
+                                    .font(.caption)
+                            }
+                        }
+                    } else {
                         Text(story.title ?? "")
                             .font(.body)
-                        Text(story.url ?? "")
-                            .font(.caption)
                     }
                 }
             })
             .task {
-                do {
-                    errorText = ""
-                    let storyIDs = try await AF.request("\(apiEndpoint)/topstories.json",
-                                                        method: .get)
-                        .serializingDecodable([Int].self,
-                                              decoder: JSONDecoder()).value
-                    stories = await withTaskGroup(of: HNItem.self, returning: [HNItem].self, body: { group in
-                        var stories: [HNItem] = []
-                        for storyID in storyIDs[0..<10] {
-                            group.addTask {
-                                do {
-                                    let storyItem = try await AF.request("\(apiEndpoint)/item/\(storyID).json",
-                                                                         method: .get)
-                                        .serializingDecodable(HNItem.self,
-                                                              decoder: JSONDecoder()).value
-                                    return storyItem
-                                } catch {
-                                    return HNItem(id: -1, type: "", by: "", time: 0)
-                                }
-                            }
-                        }
-                        for await result in group {
-                            stories.append(result)
-                        }
-                        return stories
-                    })
-                } catch {
-                    errorText = error.localizedDescription
-                }
+                await refreshStories()
+            }
+            .refreshable {
+                await refreshStories()
             }
             .overlay {
                 if errorText != "" {
@@ -73,6 +55,38 @@ struct StoriesView: View {
             }
             .listStyle(.plain)
             .navigationTitle("記事")
+        }
+    }
+    
+    func refreshStories() async {
+        do {
+            errorText = ""
+            let storyIDs = try await AF.request("\(apiEndpoint)/topstories.json",
+                                                method: .get)
+                .serializingDecodable([Int].self,
+                                      decoder: JSONDecoder()).value
+            stories = await withTaskGroup(of: HNItem.self, returning: [HNItem].self, body: { group in
+                var stories: [HNItem] = []
+                for storyID in storyIDs[0..<10] {
+                    group.addTask {
+                        do {
+                            let storyItem = try await AF.request("\(apiEndpoint)/item/\(storyID).json",
+                                                                 method: .get)
+                                .serializingDecodable(HNItem.self,
+                                                      decoder: JSONDecoder()).value
+                            return storyItem
+                        } catch {
+                            return HNItem(id: -1, type: "", by: "", time: 0)
+                        }
+                    }
+                }
+                for await result in group {
+                    stories.append(result)
+                }
+                return stories
+            })
+        } catch {
+            errorText = error.localizedDescription
         }
     }
 }
