@@ -67,19 +67,23 @@ struct StoriesView: View {
                                 Button {
                                     isTranslateEnabled = true
                                 } label: {
-                                    Image(uiImage: UIImage(
-                                        systemName: "textformat.size",
-                                        withConfiguration: .init(locale:
-                                                .init(identifier: "ja-JP")))!)
+                                    if #available(iOS 17, *) {
+                                        Image(uiImage: UIImage(
+                                            systemName: "textformat.size",
+                                            withConfiguration: .init(locale:
+                                                    .init(identifier: "ja-JP")))!)
+                                    }
                                     Text("日本語")
                                 }
                                 Button {
                                     isTranslateEnabled = false
                                 } label: {
-                                    Image(uiImage: UIImage(
-                                        systemName: "textformat.size",
-                                        withConfiguration: .init(locale:
-                                                .init(identifier: "en-US")))!)
+                                    if #available(iOS 17, *) {
+                                        Image(uiImage: UIImage(
+                                            systemName: "textformat.size",
+                                            withConfiguration: .init(locale:
+                                                    .init(identifier: "en-US")))!)
+                                    }
                                     Text("英語（原文）")
                                 }
                             } label: {
@@ -205,8 +209,4 @@ struct StoriesView: View {
             errorText = error.localizedDescription
         }
     }
-}
-
-#Preview {
-    StoriesView(type: .top)
 }

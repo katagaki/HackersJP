@@ -147,7 +147,3 @@ SOFTWARE.
         }
     }
 }
-
-#Preview {
-    LicensesView()
-}
