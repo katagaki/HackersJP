@@ -6,37 +6,96 @@
 //
 
 import Alamofire
+import MLKitTranslate
 import SwiftUI
 
 struct StoriesView: View {
 
-    @State var stories: [HNItem] = []
+    let translator = Translator.translator(
+        options: TranslatorOptions(sourceLanguage: .english,
+                                   targetLanguage: .japanese))
+
+    @State var stories: [HNItemLocalizable] = []
+    @State var progressText: String = "準備中…"
     @State var errorText: String = ""
+    @State var isTranslateEnabled: Bool = true
 
     var body: some View {
         NavigationStack {
-            List(stories, id: \.id, rowContent: { story in
-                if story.id != -1 {
-                    if let url = story.url {
-                        Link(destination: URL(string: url)!) {
-                            VStack(alignment: .leading, spacing: 2.0) {
-                                Text(story.title ?? "")
-                                    .font(.body)
-                                Text(story.url ?? "")
-                                    .font(.caption)
-                            }
-                        }
-                    } else {
-                        Text(story.title ?? "")
-                            .font(.body)
-                    }
-                }
+            List(stories, id: \.item.id, rowContent: { story in
+                StoryItemView(story: story,
+                              isTranslateEnabled: $isTranslateEnabled)
             })
             .task {
-                await refreshStories()
+                do {
+                    progressText = "翻訳用リソースをダウンロード中…"
+                    try await translator.downloadModelIfNeeded()
+                    progressText = "記事を読み込み中…"
+                    await refreshStories()
+                    progressText = ""
+                } catch {
+                    errorText = error.localizedDescription
+                }
             }
             .refreshable {
                 await refreshStories()
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    if isTranslateEnabled && progressText == "" {
+                        Image("TranslateBanner")
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    HStack(alignment: .center, spacing: 8.0) {
+                        Menu("表示設定") {
+                            ControlGroup {
+                                Button {
+                                    isTranslateEnabled = true
+                                } label: {
+                                    Image(uiImage: UIImage(
+                                        systemName: "textformat.size",
+                                        withConfiguration: .init(locale:
+                                                .init(identifier: "ja-JP")))!)
+                                    Text("日本語")
+                                }
+                                Button {
+                                    isTranslateEnabled = false
+                                } label: {
+                                    Image(uiImage: UIImage(
+                                        systemName: "textformat.size",
+                                        withConfiguration: .init(locale:
+                                                .init(identifier: "en-US")))!)
+                                    Text("英語（原文）")
+                                }
+                            } label: {
+                                Text("言語")
+                            }
+                            ControlGroup {
+                                Button {
+                                    // TODO: Sort by Top
+                                } label: {
+                                    Image(systemName: "flame")
+                                    Text("トップ")
+                                }
+                                Button {
+                                    // TODO: Sort by New
+                                } label: {
+                                    Image(systemName: "clock")
+                                    Text("新しい順")
+                                }
+                                Button {
+                                    // TODO: Sort by Best
+                                } label: {
+                                    Image(systemName: "trophy")
+                                    Text("ベスト")
+                                }
+                            } label: {
+                                Text("並べ替え")
+                            }
+                        }
+                    }
+                }
             }
             .overlay {
                 if errorText != "" {
@@ -46,10 +105,11 @@ struct StoriesView: View {
                             .font(.largeTitle)
                         Text(errorText)
                     }
-                } else {
-                    if stories.count == 0 {
+                } else if progressText != "" {
+                    VStack(alignment: .center, spacing: 8) {
                         ProgressView()
                             .progressViewStyle(.circular)
+                        Text(progressText)
                     }
                 }
             }
@@ -65,23 +125,30 @@ struct StoriesView: View {
                                                 method: .get)
                 .serializingDecodable([Int].self,
                                       decoder: JSONDecoder()).value
-            stories = await withTaskGroup(of: HNItem.self, returning: [HNItem].self, body: { group in
-                var stories: [HNItem] = []
-                for storyID in storyIDs[0..<10] {
+            stories = await withTaskGroup(of: HNItemLocalizable?.self, returning: [HNItemLocalizable].self, body: { group in
+                var stories: [HNItemLocalizable] = []
+                for storyID in storyIDs[0..<30] {
                     group.addTask {
                         do {
                             let storyItem = try await AF.request("\(apiEndpoint)/item/\(storyID).json",
                                                                  method: .get)
                                 .serializingDecodable(HNItem.self,
                                                       decoder: JSONDecoder()).value
-                            return storyItem
+                            var newLocalizableItem = HNItemLocalizable(
+                                titleLocalized: "",
+                                item: storyItem)
+                            newLocalizableItem.titleLocalized = try await translator
+                                .translate(storyItem.title ?? "")
+                            return newLocalizableItem
                         } catch {
-                            return HNItem(id: -1, type: "", by: "", time: 0)
+                            return nil
                         }
                     }
                 }
                 for await result in group {
-                    stories.append(result)
+                    if let result = result {
+                        stories.append(result)
+                    }
                 }
                 return stories
             })

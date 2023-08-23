@@ -9,6 +9,11 @@ import Foundation
 
 let apiEndpoint = "https://hacker-news.firebaseio.com/v0"
 
+struct HNItemLocalizable {
+    var titleLocalized: String
+    var item: HNItem
+}
+
 struct HNItem: Decodable {
     var id: Int
     var deleted: Bool?
