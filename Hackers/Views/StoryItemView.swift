@@ -5,11 +5,13 @@
 //  Created by シンジャスティン on 2023/08/23.
 //
 
+import FaviconFinder
 import SwiftUI
 
 struct StoryItemView: View {
 
     @State var story: HNItemLocalizable
+    @State var favicon: UIImage? = nil
     @Binding var isTranslateEnabled: Bool
 
     var body: some View {
@@ -19,9 +21,39 @@ struct StoryItemView: View {
                     Text((isTranslateEnabled ?
                           story.titleLocalized : story.item.title) ?? "")
                         .font(.body)
-                    Text(hostname(of: url))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    HStack(alignment: .center, spacing: 4.0) {
+                        if let favicon = favicon {
+                            Image(uiImage: favicon)
+                                .resizable()
+                                .frame(width: 12, height: 12)
+                                .fixedSize()
+                                .clipShape(RoundedRectangle(cornerRadius: 2.0))
+                        } else {
+                            Image(systemName: "globe")
+                                .resizable()
+                                .frame(width: 12, height: 12)
+                                .fixedSize()
+                                .task {
+                                    do {
+                                        let downloadedFavicon = try await FaviconFinder(
+                                            url: URL(string: url)!,
+                                            preferredType: .html,
+                                            preferences: [
+                                                .html: FaviconType.appleTouchIcon.rawValue,
+                                                .ico: "favicon.ico",
+                                                .webApplicationManifestFile: FaviconType.launcherIcon4x.rawValue
+                                            ]
+                                        ).downloadFavicon()
+                                        favicon = downloadedFavicon.image
+                                    } catch {
+                                        debugPrint("Favicon not found.")
+                                    }
+                                }
+                        }
+                        Text(hostname(of: url))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             } else {
                 Text((isTranslateEnabled ?

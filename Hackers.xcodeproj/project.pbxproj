@@ -18,6 +18,7 @@
 		E46652CE2A9473720048BA05 /* StoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46652CD2A9473720048BA05 /* StoriesView.swift */; };
 		E477E7202A95D55A00517B72 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = E477E71F2A95D55A00517B72 /* Alamofire */; };
 		E477E7222A95D7FD00517B72 /* SafariView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E477E7212A95D7FD00517B72 /* SafariView.swift */; };
+		E477E7252A95E33E00517B72 /* FaviconFinder in Frameworks */ = {isa = PBXBuildFile; productRef = E477E7242A95E33E00517B72 /* FaviconFinder */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E477E7252A95E33E00517B72 /* FaviconFinder in Frameworks */,
 				E477E7202A95D55A00517B72 /* Alamofire in Frameworks */,
 				681D07F500846733B18A2A18 /* Pods_Hackers.framework in Frameworks */,
 			);
@@ -143,6 +145,7 @@
 			name = Hackers;
 			packageProductDependencies = (
 				E477E71F2A95D55A00517B72 /* Alamofire */,
+				E477E7242A95E33E00517B72 /* FaviconFinder */,
 			);
 			productName = Hackers;
 			productReference = E46652B42A9463CB0048BA05 /* Hackers.app */;
@@ -174,6 +177,7 @@
 			mainGroup = E46652AB2A9463CB0048BA05;
 			packageReferences = (
 				E477E71E2A95D55900517B72 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				E477E7232A95E33E00517B72 /* XCRemoteSwiftPackageReference "FaviconFinder" */,
 			);
 			productRefGroup = E46652B52A9463CB0048BA05 /* Products */;
 			projectDirPath = "";
@@ -509,6 +513,14 @@
 				minimumVersion = 5.7.1;
 			};
 		};
+		E477E7232A95E33E00517B72 /* XCRemoteSwiftPackageReference "FaviconFinder" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/will-lumley/FaviconFinder.git";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 4.2.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -516,6 +528,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E477E71E2A95D55900517B72 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
+		};
+		E477E7242A95E33E00517B72 /* FaviconFinder */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E477E7232A95E33E00517B72 /* XCRemoteSwiftPackageReference "FaviconFinder" */;
+			productName = FaviconFinder;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
