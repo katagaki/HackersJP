@@ -55,83 +55,38 @@ struct StoriesView: View {
                 await refreshStories()
             }
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .navigationBarLeading) {
                     if isTranslateEnabled && progressText == "" {
                         Image("TranslateBanner")
                     }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Menu("表示設定") {
-                        if #available(iOS 17, *) {
-                            ControlGroup {
-                                Button {
-                                    isTranslateEnabled = true
-                                } label: {
-                                    Image(uiImage: UIImage(
-                                        systemName: "textformat.size",
-                                        withConfiguration: .init(locale:
-                                                .init(identifier: "ja-JP")))!)
-                                    Text("日本語")
-                                }
-                                Button {
-                                    isTranslateEnabled = false
-                                } label: {
-                                    Image(uiImage: UIImage(
-                                        systemName: "textformat.size",
-                                        withConfiguration: .init(locale:
-                                                .init(identifier: "en-US")))!)
-                                    Text("英語（原文）")
-                                }
-                            } label: {
-                                Text("言語")
-                            }
-                            if type == .top || type == .new || type == .best {
-                                ControlGroup {
-                                    Button {
-                                        Task {
-                                            type = .top
-                                            await refreshStoriesWithProgress()
-                                        }
-                                    } label: {
-                                        Image(systemName: "flame")
-                                        Text("トップ")
-                                    }
-                                    Button {
-                                        Task {
-                                            type = .new
-                                            await refreshStoriesWithProgress()
-                                        }
-                                    } label: {
-                                        Image(systemName: "clock")
-                                        Text("新しい順")
-                                    }
-                                    Button {
-                                        Task {
-                                            type = .best
-                                            await refreshStoriesWithProgress()
-                                        }
-                                    } label: {
-                                        Image(systemName: "trophy")
-                                        Text("ベスト")
-                                    }
-                                } label: {
-                                    Text("並べ替え")
-                                }
-                            }
-                        } else {
-                            Text("言語")
+#if swift(>=5.9)
+                        ControlGroup {
                             Button {
                                 isTranslateEnabled = true
                             } label: {
+                                Image(uiImage: UIImage(
+                                    systemName: "textformat.size",
+                                    withConfiguration: .init(locale:
+                                            .init(identifier: "ja-JP")))!)
                                 Text("日本語")
                             }
                             Button {
                                 isTranslateEnabled = false
                             } label: {
+                                Image(uiImage: UIImage(
+                                    systemName: "textformat.size",
+                                    withConfiguration: .init(locale:
+                                            .init(identifier: "en-US")))!)
                                 Text("英語（原文）")
                             }
-                            if type == .top || type == .new || type == .best {
-                                Text("並べ替え")
+                        } label: {
+                            Text("言語")
+                        }
+                        if type == .top || type == .new || type == .best {
+                            ControlGroup {
                                 Button {
                                     Task {
                                         type = .top
@@ -159,8 +114,53 @@ struct StoriesView: View {
                                     Image(systemName: "trophy")
                                     Text("ベスト")
                                 }
+                            } label: {
+                                Text("並べ替え")
                             }
                         }
+#else
+                        Text("言語")
+                        Button {
+                            isTranslateEnabled = true
+                        } label: {
+                            Text("日本語")
+                        }
+                        Button {
+                            isTranslateEnabled = false
+                        } label: {
+                            Text("英語（原文）")
+                        }
+                        if type == .top || type == .new || type == .best {
+                            Text("並べ替え")
+                            Button {
+                                Task {
+                                    type = .top
+                                    await refreshStoriesWithProgress()
+                                }
+                            } label: {
+                                Image(systemName: "flame")
+                                Text("トップ")
+                            }
+                            Button {
+                                Task {
+                                    type = .new
+                                    await refreshStoriesWithProgress()
+                                }
+                            } label: {
+                                Image(systemName: "clock")
+                                Text("新しい順")
+                            }
+                            Button {
+                                Task {
+                                    type = .best
+                                    await refreshStoriesWithProgress()
+                                }
+                            } label: {
+                                Image(systemName: "trophy")
+                                Text("ベスト")
+                            }
+                        }
+#endif
                     }
                 }
             }
