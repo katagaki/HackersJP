@@ -12,17 +12,17 @@ struct MainTabView: View {
 
     var body: some View {
         TabView {
-            StoriesView()
+            StoriesView(type: .top)
                 .tabItem {
                     Text("記事")
                     Image(systemName: "newspaper.fill")
                 }
-            Color.clear
+            StoriesView(type: .job)
                 .tabItem {
                     Text("求人")
                     Image(systemName: "person.bubble.fill")
                 }
-            Color.clear
+            StoriesView(type: .show)
                 .tabItem {
                     Text("展示")
                     Image(systemName: "sparkles.rectangle.stack.fill")

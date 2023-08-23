@@ -15,6 +15,7 @@ struct StoriesView: View {
         options: TranslatorOptions(sourceLanguage: .english,
                                    targetLanguage: .japanese))
 
+    @State var type: HNStoryType
     @State var stories: [HNItemLocalizable] = []
     @State var selectedStory: HNItemLocalizable? = nil
     @State var progressText: String = "準備中…"
@@ -137,26 +138,32 @@ struct StoriesView: View {
                 }
             })
             .listStyle(.plain)
-            .navigationTitle("記事")
+            .navigationTitle(type.getConfig().viewTitle)
         }
     }
     
     func refreshStories() async {
         do {
             errorText = ""
-            let storyIDs = try await AF.request("\(apiEndpoint)/topstories.json",
+            let storyIDs = try await AF.request("\(apiEndpoint)/\(type.getConfig().jsonName).json",
                                                 method: .get)
                 .serializingDecodable([Int].self,
                                       decoder: JSONDecoder()).value
-            stories = await withTaskGroup(of: HNItemLocalizable?.self, returning: [HNItemLocalizable].self, body: { group in
+            stories = await withTaskGroup(of: HNItemLocalizable?.self, 
+                                          returning: [HNItemLocalizable].self, body: { group in
                 var stories: [HNItemLocalizable] = []
                 for storyID in storyIDs[0..<30] {
                     group.addTask {
                         do {
-                            let storyItem = try await AF.request("\(apiEndpoint)/item/\(storyID).json",
+                            var storyItem = try await AF.request("\(apiEndpoint)/item/\(storyID).json",
                                                                  method: .get)
                                 .serializingDecodable(HNItem.self,
                                                       decoder: JSONDecoder()).value
+                            switch type {
+                            case .show:
+                                storyItem.title = storyItem.title?.replacingOccurrences(of: "Show HN: ", with: "")
+                            default: break
+                            }
                             var newLocalizableItem = HNItemLocalizable(
                                 titleLocalized: "",
                                 item: storyItem)
@@ -182,5 +189,5 @@ struct StoriesView: View {
 }
 
 #Preview {
-    StoriesView()
+    StoriesView(type: .top)
 }

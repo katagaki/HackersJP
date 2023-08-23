@@ -19,6 +19,7 @@
 		E477E7202A95D55A00517B72 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = E477E71F2A95D55A00517B72 /* Alamofire */; };
 		E477E7222A95D7FD00517B72 /* SafariView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E477E7212A95D7FD00517B72 /* SafariView.swift */; };
 		E477E7252A95E33E00517B72 /* FaviconFinder in Frameworks */ = {isa = PBXBuildFile; productRef = E477E7242A95E33E00517B72 /* FaviconFinder */; };
+		E477E7282A95F0EC00517B72 /* HNStoryType.swift in Sources */ = {isa = PBXBuildFile; fileRef = E477E7272A95F0EC00517B72 /* HNStoryType.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +39,7 @@
 		E46652D02A94FAB10048BA05 /* MLKitTranslate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MLKitTranslate.framework; path = Pods/MLKitTranslate/Frameworks/MLKitTranslate.framework; sourceTree = "<group>"; };
 		E46652D42A94FE280048BA05 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		E477E7212A95D7FD00517B72 /* SafariView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariView.swift; sourceTree = "<group>"; };
+		E477E7272A95F0EC00517B72 /* HNStoryType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HNStoryType.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +112,7 @@
 				E46652BD2A9463CE0048BA05 /* Hackers.entitlements */,
 				E46652B72A9463CB0048BA05 /* HackersApp.swift */,
 				E41D15362A95B804008B686B /* Structs */,
+				E477E7262A95F0D300517B72 /* Enums */,
 				E41D15372A95B812008B686B /* Views */,
 			);
 			path = Hackers;
@@ -122,6 +125,14 @@
 				7273C0718512D5967816A81D /* Pods_Hackers.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E477E7262A95F0D300517B72 /* Enums */ = {
+			isa = PBXGroup;
+			children = (
+				E477E7272A95F0EC00517B72 /* HNStoryType.swift */,
+			);
+			path = Enums;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -270,6 +281,7 @@
 				E477E7222A95D7FD00517B72 /* SafariView.swift in Sources */,
 				E41D15332A95B00C008B686B /* StoryItemView.swift in Sources */,
 				E46652CC2A94690B0048BA05 /* LicensesView.swift in Sources */,
+				E477E7282A95F0EC00517B72 /* HNStoryType.swift in Sources */,
 				E46652B82A9463CB0048BA05 /* HackersApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
