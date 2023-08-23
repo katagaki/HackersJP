@@ -14,7 +14,7 @@ struct MainTabView: View {
         TabView {
             StoriesView(type: .top)
                 .tabItem {
-                    Text("記事")
+                    Text("フィード")
                     Image(systemName: "newspaper.fill")
                 }
             StoriesView(type: .job)
@@ -27,10 +27,10 @@ struct MainTabView: View {
                     Text("展示")
                     Image(systemName: "sparkles.rectangle.stack.fill")
                 }
-            LicensesView()
+            MoreView()
                 .tabItem {
-                    Text("著者権")
-                    Image(systemName: "books.vertical.fill")
+                    Text("その他")
+                    Image(systemName: "ellipsis")
                 }
         }
     }

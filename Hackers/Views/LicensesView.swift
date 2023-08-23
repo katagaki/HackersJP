@@ -138,11 +138,8 @@ SOFTWARE.
                         .font(.caption)
                         .monospaced()
                 } header: {
-                    Text(license.libraryName)
-                        .textCase(.none)
-                        .font(.headline)
-                        .bold()
-                        .foregroundStyle(.primary)
+                    ListSectionHeader(text: license.libraryName)
+                        .font(.body)
                 }
             }
             .listStyle(.grouped)

@@ -84,27 +84,38 @@ struct StoriesView: View {
                             } label: {
                                 Text("言語")
                             }
-                            ControlGroup {
-                                Button {
-                                    // TODO: Sort by Top
+                            if type == .top || type == .new || type == .best {
+                                ControlGroup {
+                                    Button {
+                                        Task {
+                                            type = .top
+                                            await refreshStoriesWithProgress()
+                                        }
+                                    } label: {
+                                        Image(systemName: "flame")
+                                        Text("トップ")
+                                    }
+                                    Button {
+                                        Task {
+                                            type = .new
+                                            await refreshStoriesWithProgress()
+                                        }
+                                    } label: {
+                                        Image(systemName: "clock")
+                                        Text("新しい順")
+                                    }
+                                    Button {
+                                        Task {
+                                            type = .best
+                                            await refreshStoriesWithProgress()
+                                        }
+                                    } label: {
+                                        Image(systemName: "trophy")
+                                        Text("ベスト")
+                                    }
                                 } label: {
-                                    Image(systemName: "flame")
-                                    Text("トップ")
+                                    Text("並べ替え")
                                 }
-                                Button {
-                                    // TODO: Sort by New
-                                } label: {
-                                    Image(systemName: "clock")
-                                    Text("新しい順")
-                                }
-                                Button {
-                                    // TODO: Sort by Best
-                                } label: {
-                                    Image(systemName: "trophy")
-                                    Text("ベスト")
-                                }
-                            } label: {
-                                Text("並べ替え")
                             }
                         }
                     }
@@ -140,6 +151,13 @@ struct StoriesView: View {
             .listStyle(.plain)
             .navigationTitle(type.getConfig().viewTitle)
         }
+    }
+    
+    func refreshStoriesWithProgress() async {
+        stories.removeAll()
+        progressText = "記事を読み込み中…"
+        await refreshStories()
+        progressText = ""
     }
     
     func refreshStories() async {
