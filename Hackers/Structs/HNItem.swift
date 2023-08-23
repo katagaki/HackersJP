@@ -1,5 +1,5 @@
 //
-//  API.swift
+//  HNItem.swift
 //  Hackers
 //
 //  Created by シンジャスティン on 2023/08/22.

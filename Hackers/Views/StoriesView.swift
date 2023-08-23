@@ -18,6 +18,7 @@ struct StoriesView: View {
     @State var stories: [HNItemLocalizable] = []
     @State var progressText: String = "準備中…"
     @State var errorText: String = ""
+    @State var isFirstLoadCompleted: Bool = false
     @State var isTranslateEnabled: Bool = true
 
     var body: some View {
@@ -27,14 +28,17 @@ struct StoriesView: View {
                               isTranslateEnabled: $isTranslateEnabled)
             })
             .task {
-                do {
-                    progressText = "翻訳用リソースをダウンロード中…"
-                    try await translator.downloadModelIfNeeded()
-                    progressText = "記事を読み込み中…"
-                    await refreshStories()
-                    progressText = ""
-                } catch {
-                    errorText = error.localizedDescription
+                if !isFirstLoadCompleted {
+                    do {
+                        progressText = "翻訳用リソースをダウンロード中…"
+                        try await translator.downloadModelIfNeeded()
+                        progressText = "記事を読み込み中…"
+                        await refreshStories()
+                        progressText = ""
+                    } catch {
+                        errorText = error.localizedDescription
+                    }
+                    isFirstLoadCompleted = true
                 }
             }
             .refreshable {
