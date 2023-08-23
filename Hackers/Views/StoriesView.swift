@@ -67,23 +67,27 @@ struct StoriesView: View {
                                 Button {
                                     isTranslateEnabled = true
                                 } label: {
+#if swift(>=5.9)
                                     if #available(iOS 17, *) {
                                         Image(uiImage: UIImage(
                                             systemName: "textformat.size",
                                             withConfiguration: .init(locale:
                                                     .init(identifier: "ja-JP")))!)
                                     }
+#endif
                                     Text("日本語")
                                 }
                                 Button {
                                     isTranslateEnabled = false
                                 } label: {
+#if swift(>=5.9)
                                     if #available(iOS 17, *) {
                                         Image(uiImage: UIImage(
                                             systemName: "textformat.size",
                                             withConfiguration: .init(locale:
                                                     .init(identifier: "en-US")))!)
                                     }
+#endif
                                     Text("英語（原文）")
                                 }
                             } label: {

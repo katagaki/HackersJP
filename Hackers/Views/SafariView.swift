@@ -20,7 +20,11 @@ struct SafariView: UIViewControllerRepresentable {
             url: url,
             configuration: configuration)
         safariViewController.dismissButtonStyle = .close
+#if swift(>=5.9)
+        safariViewController.preferredControlTintColor = UIColor.accent
+#else
         safariViewController.preferredControlTintColor = UIColor(named: "AccentColor")
+#endif
         safariViewController.hidesBottomBarWhenPushed = false
 
         return safariViewController
