@@ -12,6 +12,7 @@ struct StoryItemView: View {
 
     @State var story: HNItemLocalizable
     @State var favicon: UIImage? = nil
+    @State var isFirstFaviconFetchCompleted: Bool = false
     @Binding var isTranslateEnabled: Bool
 
     var body: some View {
@@ -34,19 +35,22 @@ struct StoryItemView: View {
                                 .frame(width: 12, height: 12)
                                 .fixedSize()
                                 .task {
-                                    do {
-                                        let downloadedFavicon = try await FaviconFinder(
-                                            url: URL(string: url)!,
-                                            preferredType: .html,
-                                            preferences: [
-                                                .html: FaviconType.appleTouchIcon.rawValue,
-                                                .ico: "favicon.ico",
-                                                .webApplicationManifestFile: FaviconType.launcherIcon4x.rawValue
-                                            ]
-                                        ).downloadFavicon()
-                                        favicon = downloadedFavicon.image
-                                    } catch {
-                                        debugPrint("Favicon not found.")
+                                    if !isFirstFaviconFetchCompleted {
+                                        do {
+                                            let downloadedFavicon = try await FaviconFinder(
+                                                url: URL(string: url)!,
+                                                preferredType: .html,
+                                                preferences: [
+                                                    .html: FaviconType.appleTouchIcon.rawValue,
+                                                    .ico: "favicon.ico",
+                                                    .webApplicationManifestFile: FaviconType.launcherIcon4x.rawValue
+                                                ]
+                                            ).downloadFavicon()
+                                            favicon = downloadedFavicon.image
+                                        } catch {
+                                            debugPrint("Favicon not found.")
+                                        }
+                                        isFirstFaviconFetchCompleted = true
                                     }
                                 }
                         }

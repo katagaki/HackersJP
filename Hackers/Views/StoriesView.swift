@@ -26,15 +26,16 @@ struct StoriesView: View {
     var body: some View {
         NavigationStack {
             List(stories, id: \.item.id, rowContent: { story in
-                HStack {
-                    StoryItemView(story: story,
-                                  isTranslateEnabled: $isTranslateEnabled)
-                    Spacer()
+                Button {
+                    selectedStory = story
+                } label: {
+                    HStack {
+                        StoryItemView(story: story,
+                                      isTranslateEnabled: $isTranslateEnabled)
+                        Spacer()
+                    }
                 }
                 .contentShape(Rectangle())
-                .onTapGesture {
-                    selectedStory = story
-                }
             })
             .task {
                 if !isFirstLoadCompleted {
