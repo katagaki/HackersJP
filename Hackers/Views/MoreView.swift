@@ -12,10 +12,10 @@ struct MoreView: View {
         NavigationStack {
             List {
                 Section {
-                    Link(destination: URL(string: "https://twitter.com/katagaki_")!) {
+                    Link(destination: URL(string: "https://x.com/katagaki_")!) {
                         HStack {
                             ListRow(image: "ListIcon.Twitter",
-                                    title: "ツイート",
+                                    title: "Xでポスト",
                                     subtitle: "@katagaki_",
                                     includeSpacer: true)
                             Image(systemName: "safari")
