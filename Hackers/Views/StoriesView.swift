@@ -62,7 +62,6 @@ struct StoriesView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu("表示設定") {
-#if swift(>=5.9)
                         if #available(iOS 17, *) {
                             ControlGroup {
                                 Button {
@@ -119,50 +118,49 @@ struct StoriesView: View {
                                     Text("並べ替え")
                                 }
                             }
-                        }
-#else
-                        Text("言語")
-                        Button {
-                            isTranslateEnabled = true
-                        } label: {
-                            Text("日本語")
-                        }
-                        Button {
-                            isTranslateEnabled = false
-                        } label: {
-                            Text("英語（原文）")
-                        }
-                        if type == .top || type == .new || type == .best {
-                            Text("並べ替え")
+                        } else {
+                            Text("言語")
                             Button {
-                                Task {
-                                    type = .top
-                                    await refreshStoriesWithProgress()
-                                }
+                                isTranslateEnabled = true
                             } label: {
-                                Image(systemName: "flame")
-                                Text("トップ")
+                                Text("日本語")
                             }
                             Button {
-                                Task {
-                                    type = .new
-                                    await refreshStoriesWithProgress()
-                                }
+                                isTranslateEnabled = false
                             } label: {
-                                Image(systemName: "clock")
-                                Text("新しい順")
+                                Text("英語（原文）")
                             }
-                            Button {
-                                Task {
-                                    type = .best
-                                    await refreshStoriesWithProgress()
+                            if type == .top || type == .new || type == .best {
+                                Text("並べ替え")
+                                Button {
+                                    Task {
+                                        type = .top
+                                        await refreshStoriesWithProgress()
+                                    }
+                                } label: {
+                                    Image(systemName: "flame")
+                                    Text("トップ")
                                 }
-                            } label: {
-                                Image(systemName: "trophy")
-                                Text("ベスト")
+                                Button {
+                                    Task {
+                                        type = .new
+                                        await refreshStoriesWithProgress()
+                                    }
+                                } label: {
+                                    Image(systemName: "clock")
+                                    Text("新しい順")
+                                }
+                                Button {
+                                    Task {
+                                        type = .best
+                                        await refreshStoriesWithProgress()
+                                    }
+                                } label: {
+                                    Image(systemName: "trophy")
+                                    Text("ベスト")
+                                }
                             }
                         }
-#endif
                     }
                 }
             }
