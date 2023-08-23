@@ -3,7 +3,6 @@ use_frameworks!
 
 target 'Hackers' do
   pod 'GoogleMLKit/Translate', '3.2.0'
-  pod 'Alamofire', '5.7.1'
 end
 
 post_install do |installer|

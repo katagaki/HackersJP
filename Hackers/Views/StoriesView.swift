@@ -16,6 +16,7 @@ struct StoriesView: View {
                                    targetLanguage: .japanese))
 
     @State var stories: [HNItemLocalizable] = []
+    @State var selectedStory: HNItemLocalizable? = nil
     @State var progressText: String = "準備中…"
     @State var errorText: String = ""
     @State var isFirstLoadCompleted: Bool = false
@@ -24,8 +25,15 @@ struct StoriesView: View {
     var body: some View {
         NavigationStack {
             List(stories, id: \.item.id, rowContent: { story in
-                StoryItemView(story: story,
-                              isTranslateEnabled: $isTranslateEnabled)
+                HStack {
+                    StoryItemView(story: story,
+                                  isTranslateEnabled: $isTranslateEnabled)
+                    Spacer()
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    selectedStory = story
+                }
             })
             .task {
                 if !isFirstLoadCompleted {
@@ -117,6 +125,17 @@ struct StoriesView: View {
                     }
                 }
             }
+            .sheet(item: $selectedStory, onDismiss: {
+                selectedStory = nil
+            }, content: { story in
+                if isTranslateEnabled {
+                    SafariView(url: URL(string: story.urlTranslated())!)
+                        .ignoresSafeArea()
+                } else {
+                    SafariView(url: URL(string: story.item.url!)!)
+                        .ignoresSafeArea()
+                }
+            })
             .listStyle(.plain)
             .navigationTitle("記事")
         }
