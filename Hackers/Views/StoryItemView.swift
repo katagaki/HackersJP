@@ -41,7 +41,7 @@ struct StoryItemView: View {
                                                 url: URL(string: url)!,
                                                 preferredType: .html,
                                                 preferences: [
-                                                    .html: FaviconType.appleTouchIcon.rawValue,
+                                                    .html: FaviconType.appleTouchIconPrecomposed.rawValue,
                                                     .ico: "favicon.ico",
                                                     .webApplicationManifestFile: FaviconType.launcherIcon4x.rawValue
                                                 ]
