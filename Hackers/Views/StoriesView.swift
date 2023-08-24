@@ -14,6 +14,7 @@ struct StoriesView: View {
     let translator = Translator.translator(
         options: TranslatorOptions(sourceLanguage: .english,
                                    targetLanguage: .japanese))
+    let pageStep = 10
 
     @State var type: HNStoryType
     @State var stories: [HNItemLocalizable] = []
@@ -22,6 +23,8 @@ struct StoriesView: View {
     @State var errorText: String = ""
     @State var isFirstLoadCompleted: Bool = false
     @State var isTranslateEnabled: Bool = true
+    @State var currentPage: Int = 0
+    @State var storyCount: Int = 0
 
     var body: some View {
         NavigationStack {
@@ -56,7 +59,7 @@ struct StoriesView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    if isTranslateEnabled && progressText == "" {
+                    if isTranslateEnabled {
                         Image("TranslateBanner")
                     }
                 }
@@ -93,8 +96,7 @@ struct StoriesView: View {
                             ControlGroup {
                                 Button {
                                     Task {
-                                        type = .top
-                                        await refreshStoriesWithProgress()
+                                        await switchStoriesType(to: .top)
                                     }
                                 } label: {
                                     Image(systemName: "flame")
@@ -102,8 +104,7 @@ struct StoriesView: View {
                                 }
                                 Button {
                                     Task {
-                                        type = .new
-                                        await refreshStoriesWithProgress()
+                                        await switchStoriesType(to: .new)
                                     }
                                 } label: {
                                     Image(systemName: "clock")
@@ -111,8 +112,7 @@ struct StoriesView: View {
                                 }
                                 Button {
                                     Task {
-                                        type = .best
-                                        await refreshStoriesWithProgress()
+                                        await switchStoriesType(to: .best)
                                     }
                                 } label: {
                                     Image(systemName: "trophy")
@@ -138,8 +138,7 @@ struct StoriesView: View {
                             Text("並べ替え")
                             Button {
                                 Task {
-                                    type = .top
-                                    await refreshStoriesWithProgress()
+                                    await switchStoriesType(to: .top)
                                 }
                             } label: {
                                 Image(systemName: "flame")
@@ -147,8 +146,7 @@ struct StoriesView: View {
                             }
                             Button {
                                 Task {
-                                    type = .new
-                                    await refreshStoriesWithProgress()
+                                    await switchStoriesType(to: .new)
                                 }
                             } label: {
                                 Image(systemName: "clock")
@@ -156,8 +154,7 @@ struct StoriesView: View {
                             }
                             Button {
                                 Task {
-                                    type = .best
-                                    await refreshStoriesWithProgress()
+                                    await switchStoriesType(to: .best)
                                 }
                             } label: {
                                 Image(systemName: "trophy")
@@ -165,6 +162,31 @@ struct StoriesView: View {
                             }
                         }
 #endif
+                    }
+                }
+                ToolbarItem(placement: .bottomBar) {
+                    HStack(alignment: .center, spacing: 2) {
+                        Button {
+                            Task {
+                                currentPage -= 1
+                                await refreshStoriesWithProgress()
+                            }
+                        } label: {
+                            Image(systemName: "arrowtriangle.left")
+                        }
+                        .disabled(!(progressText == "") || currentPage == 0)
+                        Spacer()
+                        Text("ページ \(currentPage + 1) / \(Int(ceil(Double(storyCount) / Double(pageStep))))")
+                        Spacer()
+                        Button {
+                            Task {
+                                currentPage += 1
+                                await refreshStoriesWithProgress()
+                            }
+                        } label: {
+                            Image(systemName: "arrowtriangle.right")
+                        }
+                        .disabled(!(progressText == "") || currentPage + 1 >= Int(ceil(Double(storyCount) / Double(pageStep))))
                     }
                 }
             }
@@ -200,6 +222,12 @@ struct StoriesView: View {
         }
     }
     
+    func switchStoriesType(to newType: HNStoryType) async {
+        type = newType
+        currentPage = 0
+        await refreshStoriesWithProgress()
+    }
+    
     func refreshStoriesWithProgress() async {
         stories.removeAll()
         progressText = "記事を読み込み中…"
@@ -214,12 +242,15 @@ struct StoriesView: View {
                                                 method: .get)
                 .serializingDecodable([Int].self,
                                       decoder: JSONDecoder()).value
-            stories = await withTaskGroup(of: HNItemLocalizable?.self, 
+            storyCount = storyIDs.count
+            stories = await withTaskGroup(of: HNItemLocalizable?.self,
                                           returning: [HNItemLocalizable].self, body: { group in
                 var stories: [HNItemLocalizable] = []
-                for storyID in storyIDs[0..<30] {
+                let currentStartingIndex = currentPage * pageStep
+                for storyID in storyIDs[currentStartingIndex..<min(storyIDs.count, currentStartingIndex + pageStep)] {
                     group.addTask {
                         do {
+                            debugPrint("Getting HN item \(storyID).")
                             var storyItem = try await AF.request("\(apiEndpoint)/item/\(storyID).json",
                                                                  method: .get)
                                 .serializingDecodable(HNItem.self,
@@ -232,6 +263,7 @@ struct StoriesView: View {
                             var newLocalizableItem = HNItemLocalizable(
                                 titleLocalized: "",
                                 item: storyItem)
+                            debugPrint("Translating HN item \(storyID).")
                             newLocalizableItem.titleLocalized = try await translator
                                 .translate(storyItem.title ?? "")
                             return newLocalizableItem
