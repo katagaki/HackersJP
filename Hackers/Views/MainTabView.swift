@@ -39,6 +39,7 @@ struct MainTabView: View {
                     Text("その他")
                     Image(systemName: "ellipsis")
                 }
+                .tag(3)
         }
         .task {
             defaultTab = settings.startupTab
