@@ -7,12 +7,12 @@
 
 import Foundation
 
-enum HNStoryType {
-    case top
-    case new
-    case best
-    case show
-    case job
+enum HNStoryType: Int {
+    case top = 0
+    case new = 1
+    case best = 2
+    case show = 3
+    case job = 4
     
     func getConfig() -> HNStoryConfiguration {
         switch self {

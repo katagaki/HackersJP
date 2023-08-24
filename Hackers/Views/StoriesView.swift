@@ -11,10 +11,11 @@ import SwiftUI
 
 struct StoriesView: View {
 
+    @EnvironmentObject var settings: SettingsManager
+
     let translator = Translator.translator(
         options: TranslatorOptions(sourceLanguage: .english,
                                    targetLanguage: .japanese))
-    let pageStep = 10
 
     @State var type: HNStoryType
     @State var stories: [HNItemLocalizable] = []
@@ -22,7 +23,6 @@ struct StoriesView: View {
     @State var progressText: String = "準備中…"
     @State var errorText: String = ""
     @State var isFirstLoadCompleted: Bool = false
-    @State var isTranslateEnabled: Bool = true
     @State var currentPage: Int = 0
     @State var storyCount: Int = 0
 
@@ -33,8 +33,7 @@ struct StoriesView: View {
                     selectedStory = story
                 } label: {
                     HStack {
-                        StoryItemView(story: story,
-                                      isTranslateEnabled: $isTranslateEnabled)
+                        StoryItemView(story: story)
                         Spacer()
                     }
                 }
@@ -59,109 +58,8 @@ struct StoriesView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    if isTranslateEnabled {
+                    if settings.titleLanguage == 0 {
                         Image("TranslateBanner")
-                    }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu("表示設定") {
-#if swift(>=5.9)
-                        ControlGroup {
-                            Button {
-                                isTranslateEnabled = true
-                            } label: {
-                                if #available(iOS 17, *) {
-                                    Image(uiImage: UIImage(
-                                        systemName: "textformat.size",
-                                        withConfiguration: .init(locale:
-                                                .init(identifier: "ja-JP")))!)
-                                }
-                                Text("日本語")
-                            }
-                            Button {
-                                isTranslateEnabled = false
-                            } label: {
-                                if #available(iOS 17, *) {
-                                    Image(uiImage: UIImage(
-                                        systemName: "textformat.size",
-                                        withConfiguration: .init(locale:
-                                                .init(identifier: "en-US")))!)
-                                }
-                                Text("英語（原文）")
-                            }
-                        } label: {
-                            Text("言語")
-                        }
-                        if type == .top || type == .new || type == .best {
-                            ControlGroup {
-                                Button {
-                                    Task {
-                                        await switchStoriesType(to: .top)
-                                    }
-                                } label: {
-                                    Image(systemName: "flame")
-                                    Text("トップ")
-                                }
-                                Button {
-                                    Task {
-                                        await switchStoriesType(to: .new)
-                                    }
-                                } label: {
-                                    Image(systemName: "clock")
-                                    Text("新しい順")
-                                }
-                                Button {
-                                    Task {
-                                        await switchStoriesType(to: .best)
-                                    }
-                                } label: {
-                                    Image(systemName: "trophy")
-                                    Text("ベスト")
-                                }
-                            } label: {
-                                Text("並べ替え")
-                            }
-                        }
-#else
-                        Text("言語")
-                        Button {
-                            isTranslateEnabled = true
-                        } label: {
-                            Text("日本語")
-                        }
-                        Button {
-                            isTranslateEnabled = false
-                        } label: {
-                            Text("英語（原文）")
-                        }
-                        if type == .top || type == .new || type == .best {
-                            Text("並べ替え")
-                            Button {
-                                Task {
-                                    await switchStoriesType(to: .top)
-                                }
-                            } label: {
-                                Image(systemName: "flame")
-                                Text("トップ")
-                            }
-                            Button {
-                                Task {
-                                    await switchStoriesType(to: .new)
-                                }
-                            } label: {
-                                Image(systemName: "clock")
-                                Text("新しい順")
-                            }
-                            Button {
-                                Task {
-                                    await switchStoriesType(to: .best)
-                                }
-                            } label: {
-                                Image(systemName: "trophy")
-                                Text("ベスト")
-                            }
-                        }
-#endif
                     }
                 }
                 ToolbarItem(placement: .bottomBar) {
@@ -176,7 +74,7 @@ struct StoriesView: View {
                         }
                         .disabled(!(progressText == "") || currentPage == 0)
                         Spacer()
-                        Text("ページ \(currentPage + 1) / \(Int(ceil(Double(storyCount) / Double(pageStep))))")
+                        Text("ページ \(currentPage + 1) / \(Int(ceil(Double(storyCount) / Double(settings.pageStoryCount))))")
                         Spacer()
                         Button {
                             Task {
@@ -186,7 +84,7 @@ struct StoriesView: View {
                         } label: {
                             Image(systemName: "arrowtriangle.right")
                         }
-                        .disabled(!(progressText == "") || currentPage + 1 >= Int(ceil(Double(storyCount) / Double(pageStep))))
+                        .disabled(!(progressText == "") || currentPage + 1 >= Int(ceil(Double(storyCount) / Double(settings.pageStoryCount))))
                     }
                 }
             }
@@ -209,7 +107,7 @@ struct StoriesView: View {
             .sheet(item: $selectedStory, onDismiss: {
                 selectedStory = nil
             }, content: { story in
-                if isTranslateEnabled {
+                if settings.linkLanguage == 0 {
                     SafariView(url: URL(string: story.urlTranslated())!)
                         .ignoresSafeArea()
                 } else {
@@ -218,36 +116,46 @@ struct StoriesView: View {
                 }
             })
             .listStyle(.plain)
+            .onChange(of: settings.feedSort, perform: { _ in
+                Task {
+                    currentPage = 0
+                    if type == .top || type == .new || type == .best {
+                        type = settings.feedSort
+                        await refreshStoriesWithProgress()
+                    }
+                }
+            })
+            .onChange(of: settings.pageStoryCount, perform: { _ in
+                Task {
+                    currentPage = 0
+                    await refreshStoriesWithProgress()
+                }
+            })
             .navigationTitle(type.getConfig().viewTitle)
         }
     }
-    
-    func switchStoriesType(to newType: HNStoryType) async {
-        type = newType
-        currentPage = 0
-        await refreshStoriesWithProgress()
-    }
-    
+
     func refreshStoriesWithProgress() async {
         stories.removeAll()
         progressText = "記事を読み込み中…"
         await refreshStories()
         progressText = ""
     }
-    
+
     func refreshStories() async {
         do {
             errorText = ""
-            let storyIDs = try await AF.request("\(apiEndpoint)/\(type.getConfig().jsonName).json",
-                                                method: .get)
+            let jsonURL = "\(apiEndpoint)/\(type.getConfig().jsonName).json"
+            debugPrint("Fetching data from \(jsonURL).")
+            let storyIDs = try await AF.request(jsonURL, method: .get)
                 .serializingDecodable([Int].self,
                                       decoder: JSONDecoder()).value
             storyCount = storyIDs.count
             stories = await withTaskGroup(of: HNItemLocalizable?.self,
                                           returning: [HNItemLocalizable].self, body: { group in
                 var stories: [HNItemLocalizable] = []
-                let currentStartingIndex = currentPage * pageStep
-                for storyID in storyIDs[currentStartingIndex..<min(storyIDs.count, currentStartingIndex + pageStep)] {
+                let currentStartingIndex = currentPage * settings.pageStoryCount
+                for storyID in storyIDs[currentStartingIndex..<min(storyIDs.count, currentStartingIndex + settings.pageStoryCount)] {
                     group.addTask {
                         do {
                             debugPrint("Getting HN item \(storyID).")
@@ -255,7 +163,7 @@ struct StoriesView: View {
                                                                  method: .get)
                                 .serializingDecodable(HNItem.self,
                                                       decoder: JSONDecoder()).value
-                            switch type {
+                            switch await type {
                             case .show:
                                 storyItem.title = storyItem.title?.replacingOccurrences(of: "Show HN: ", with: "")
                             default: break

@@ -9,35 +9,77 @@ import SwiftUI
 
 struct MoreView: View {
 
-    @State var defaultLanguage: Int = 0
-    @State var defaultSort: Int = 0
+    @EnvironmentObject var settings: SettingsManager
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    Picker(selection: $defaultLanguage) {
-                        Text("日本語")
+                    Picker(selection: $settings.startupTab) {
+                        Text("フィード")
                             .tag(0)
-                        Text("英語（原文）")
+                        Text("求人")
                             .tag(1)
-                    } label: {
-                        ListRow(image: "ListIcon.Language",
-                                title: "言語")
-                    }
-                    Picker(selection: $defaultSort) {
-                        Text("トップ")
-                            .tag(0)
-                        Text("新しい順")
-                            .tag(1)
-                        Text("ベスト")
+                        Text("展示")
                             .tag(2)
                     } label: {
-                        ListRow(image: "ListIcon.Sort",
-                                title: "フィードの並べ替え")
+                        ListRow(image: "ListIcon.Startup",
+                                title: "デフォルトタブ")
                     }
                 } header: {
                     ListSectionHeader(text: "一般")
+                        .font(.body)
+                }
+                Section {
+                    Picker(selection: $settings.feedSort) {
+                        Text("トップ")
+                            .tag(HNStoryType.top)
+                        Text("新しい順")
+                            .tag(HNStoryType.new)
+                        Text("ベスト")
+                            .tag(HNStoryType.best)
+                    } label: {
+                        ListRow(image: "ListIcon.Sort",
+                                title: "並べ替え")
+                    }
+                    Picker(selection: $settings.pageStoryCount) {
+                        Text("10件")
+                            .tag(10)
+                        Text("20件")
+                            .tag(20)
+                        Text("30件")
+                            .tag(30)
+                    } label: {
+                        ListRow(image: "ListIcon.PageStoryCount",
+                                title: "ページの記事数")
+                    }
+                } header: {
+                    ListSectionHeader(text: "フィード")
+                        .font(.body)
+                }
+                Section {
+                    Picker(selection: $settings.titleLanguage) {
+                        Text("日本語")
+                            .tag(0)
+                        Text("英語")
+                            .tag(1)
+                    } label: {
+                        ListRow(image: "ListIcon.Language.Title",
+                                title: "タイトル",
+                                subtitle: settings.titleLanguage == 0 ? "ML Kitを使用してオフラインで翻訳されます。" : "英語の原文で表示されます。")
+                    }
+                    Picker(selection: $settings.linkLanguage) {
+                        Text("日本語")
+                            .tag(0)
+                        Text("英語")
+                            .tag(1)
+                    } label: {
+                        ListRow(image: "ListIcon.Language.Article",
+                                title: "記事",
+                                subtitle: settings.linkLanguage == 0 ? "Google翻訳を使用して翻訳されます。" : "元の記事を開きます。")
+                    }
+                } header: {
+                    ListSectionHeader(text: "言語")
                         .font(.body)
                 }
                 Section {
@@ -89,6 +131,21 @@ struct MoreView: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .onChange(of: settings.startupTab, perform: { value in
+                settings.setStartupTab(value)
+            })
+            .onChange(of: settings.feedSort, perform: { value in
+                settings.setFeedSort(value)
+            })
+            .onChange(of: settings.pageStoryCount, perform: { value in
+                settings.setPageStoryCount(value)
+            })
+            .onChange(of: settings.titleLanguage, perform: { value in
+                settings.setTitleLanguage(value)
+            })
+            .onChange(of: settings.linkLanguage, perform: { value in
+                settings.setLinkLanguage(value)
+            })
             .navigationTitle("その他")
         }
     }

@@ -10,16 +10,17 @@ import SwiftUI
 
 struct StoryItemView: View {
 
+    @EnvironmentObject var settings: SettingsManager
+
     @State var story: HNItemLocalizable
     @State var favicon: UIImage? = nil
     @State var isFirstFaviconFetchCompleted: Bool = false
-    @Binding var isTranslateEnabled: Bool
 
     var body: some View {
         if story.item.id != -1 {
             if let url = story.item.url {
                 VStack(alignment: .leading, spacing: 2.0) {
-                    Text((isTranslateEnabled ?
+                    Text((settings.titleLanguage == 0 ?
                           story.titleLocalized : story.item.title) ?? "")
                         .font(.body)
                     HStack(alignment: .center, spacing: 4.0) {
@@ -60,7 +61,7 @@ struct StoryItemView: View {
                     }
                 }
             } else {
-                Text((isTranslateEnabled ?
+                Text((settings.titleLanguage == 0 ?
                       story.titleLocalized : story.item.title) ?? "")
                     .font(.body)
             }

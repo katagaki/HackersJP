@@ -10,7 +10,7 @@
 		681D07F500846733B18A2A18 /* Pods_Hackers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7273C0718512D5967816A81D /* Pods_Hackers.framework */; };
 		E41D15332A95B00C008B686B /* StoryItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41D15322A95B00C008B686B /* StoryItemView.swift */; };
 		E41D15352A95B7E4008B686B /* License.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41D15342A95B7E4008B686B /* License.swift */; };
-		E46652B82A9463CB0048BA05 /* HackersApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46652B72A9463CB0048BA05 /* HackersApp.swift */; };
+		E46652B82A9463CB0048BA05 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46652B72A9463CB0048BA05 /* App.swift */; };
 		E46652BA2A9463CB0048BA05 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46652B92A9463CB0048BA05 /* MainTabView.swift */; };
 		E46652BC2A9463CE0048BA05 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E46652BB2A9463CE0048BA05 /* Assets.xcassets */; };
 		E46652C72A94686B0048BA05 /* HNItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46652C62A94686B0048BA05 /* HNItem.swift */; };
@@ -23,6 +23,7 @@
 		E477E72A2A95F90700517B72 /* MoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E477E7292A95F90700517B72 /* MoreView.swift */; };
 		E477E72C2A95F94600517B72 /* ListRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E477E72B2A95F94600517B72 /* ListRow.swift */; };
 		E477E72E2A95F9BE00517B72 /* ListSectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = E477E72D2A95F9BE00517B72 /* ListSectionHeader.swift */; };
+		E47FC65E2A97BBB1006BBCF9 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47FC65D2A97BBB1006BBCF9 /* SettingsManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,7 +33,7 @@
 		E41D15322A95B00C008B686B /* StoryItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryItemView.swift; sourceTree = "<group>"; };
 		E41D15342A95B7E4008B686B /* License.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = License.swift; sourceTree = "<group>"; };
 		E46652B42A9463CB0048BA05 /* Hackers.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Hackers.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E46652B72A9463CB0048BA05 /* HackersApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HackersApp.swift; sourceTree = "<group>"; };
+		E46652B72A9463CB0048BA05 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		E46652B92A9463CB0048BA05 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		E46652BB2A9463CE0048BA05 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E46652BD2A9463CE0048BA05 /* Hackers.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Hackers.entitlements; sourceTree = "<group>"; };
@@ -46,6 +47,7 @@
 		E477E7292A95F90700517B72 /* MoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreView.swift; sourceTree = "<group>"; };
 		E477E72B2A95F94600517B72 /* ListRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListRow.swift; sourceTree = "<group>"; };
 		E477E72D2A95F9BE00517B72 /* ListSectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListSectionHeader.swift; sourceTree = "<group>"; };
+		E47FC65D2A97BBB1006BBCF9 /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,7 +121,8 @@
 				E46652D42A94FE280048BA05 /* Info.plist */,
 				E46652BB2A9463CE0048BA05 /* Assets.xcassets */,
 				E46652BD2A9463CE0048BA05 /* Hackers.entitlements */,
-				E46652B72A9463CB0048BA05 /* HackersApp.swift */,
+				E46652B72A9463CB0048BA05 /* App.swift */,
+				E47FC65A2A97BB3A006BBCF9 /* Classes */,
 				E41D15362A95B804008B686B /* Structs */,
 				E477E7262A95F0D300517B72 /* Enums */,
 				E41D15372A95B812008B686B /* Views */,
@@ -142,6 +145,14 @@
 				E477E7272A95F0EC00517B72 /* HNStoryType.swift */,
 			);
 			path = Enums;
+			sourceTree = "<group>";
+		};
+		E47FC65A2A97BB3A006BBCF9 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				E47FC65D2A97BBB1006BBCF9 /* SettingsManager.swift */,
+			);
+			path = Classes;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -284,6 +295,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E477E72E2A95F9BE00517B72 /* ListSectionHeader.swift in Sources */,
+				E47FC65E2A97BBB1006BBCF9 /* SettingsManager.swift in Sources */,
 				E46652BA2A9463CB0048BA05 /* MainTabView.swift in Sources */,
 				E41D15352A95B7E4008B686B /* License.swift in Sources */,
 				E46652CE2A9473720048BA05 /* StoriesView.swift in Sources */,
@@ -293,7 +305,7 @@
 				E46652CC2A94690B0048BA05 /* LicensesView.swift in Sources */,
 				E477E7282A95F0EC00517B72 /* HNStoryType.swift in Sources */,
 				E477E72C2A95F94600517B72 /* ListRow.swift in Sources */,
-				E46652B82A9463CB0048BA05 /* HackersApp.swift in Sources */,
+				E46652B82A9463CB0048BA05 /* App.swift in Sources */,
 				E477E72A2A95F90700517B72 /* MoreView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
