@@ -67,7 +67,7 @@ struct StoriesView: View {
                             Button {
                                 isTranslateEnabled = true
                             } label: {
-                                if #available(iOS 17.0 *) {
+                                if #available(iOS 17, *) {
                                     Image(uiImage: UIImage(
                                         systemName: "textformat.size",
                                         withConfiguration: .init(locale:
@@ -78,7 +78,7 @@ struct StoriesView: View {
                             Button {
                                 isTranslateEnabled = false
                             } label: {
-                                if #available(iOS 17.0 *) {
+                                if #available(iOS 17, *) {
                                     Image(uiImage: UIImage(
                                         systemName: "textformat.size",
                                         withConfiguration: .init(locale:
