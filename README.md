@@ -2,6 +2,8 @@
 
 A Hacker News app for Japanese readers.
 
+**Download: [TestFlight](https://testflight.apple.com/join/wNgIKzEh)**
+
 ## Development
 
 ### What works
