@@ -143,7 +143,7 @@ SOFTWARE.
                 }
             }
             .listStyle(.grouped)
-            .navigationTitle("著者権")
+            .navigationTitle("著者権表記")
         }
     }
 }

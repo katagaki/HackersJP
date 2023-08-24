@@ -8,9 +8,38 @@
 import SwiftUI
 
 struct MoreView: View {
+
+    @State var defaultLanguage: Int = 0
+    @State var defaultSort: Int = 0
+
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    Picker(selection: $defaultLanguage) {
+                        Text("日本語")
+                            .tag(0)
+                        Text("英語（原文）")
+                            .tag(1)
+                    } label: {
+                        ListRow(image: "ListIcon.Language",
+                                title: "言語")
+                    }
+                    Picker(selection: $defaultSort) {
+                        Text("トップ")
+                            .tag(0)
+                        Text("新しい順")
+                            .tag(1)
+                        Text("ベスト")
+                            .tag(2)
+                    } label: {
+                        ListRow(image: "ListIcon.Sort",
+                                title: "フィードの並べ替え")
+                    }
+                } header: {
+                    ListSectionHeader(text: "一般")
+                        .font(.body)
+                }
                 Section {
                     Link(destination: URL(string: "https://x.com/katagaki_")!) {
                         HStack {
@@ -54,7 +83,7 @@ struct MoreView: View {
                         LicensesView()
                     } label: {
                         ListRow(image: "ListIcon.Attributions",
-                                title: "著者権",
+                                title: "著者権表記",
                                 includeSpacer: true)
                     }
                 }
