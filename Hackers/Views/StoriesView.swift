@@ -17,13 +17,13 @@ struct StoriesView: View {
     let translator = Translator.translator(
         options: TranslatorOptions(sourceLanguage: .english,
                                    targetLanguage: .japanese))
-
+    
+    @State var state: ViewState = .initialized
     @State var type: HNStoryType
     @State var stories: [HNItemLocalizable] = []
     @State var selectedStory: HNItemLocalizable? = nil
     @State var progressText: String = "準備中…"
     @State var errorText: String = ""
-    @State var isFirstLoadCompleted: Bool = false
     @State var currentPage: Int = 0
     @State var storyCount: Int = 0
 
@@ -57,17 +57,19 @@ struct StoriesView: View {
                 }
             })
             .task {
-                if !isFirstLoadCompleted {
+                if state == .initialized {
                     do {
+                        state = .loadingInitialData
                         progressText = "翻訳用リソースをダウンロード中…"
                         try await translator.downloadModelIfNeeded()
                         progressText = "記事を読み込み中…"
                         await refreshStories()
                         progressText = ""
+                        state = .readyForInteraction
                     } catch {
                         errorText = error.localizedDescription
+                        state = .initialized
                     }
-                    isFirstLoadCompleted = true
                 }
             }
             .refreshable {
@@ -198,7 +200,6 @@ struct StoriesView: View {
                                 newLocalizableItem.textLocalized = try await translator
                                     .translate(storyItem.text ?? "")
                             }
-                            await newLocalizableItem.downloadFavicon()
                             newLocalizableItem.cacheDate = Date()
                             await miniCache.cache(newItem: newLocalizableItem)
                             return newLocalizableItem

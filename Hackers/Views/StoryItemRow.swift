@@ -10,9 +10,11 @@ import SwiftUI
 
 struct StoryItemRow: View {
 
+    @EnvironmentObject var miniCache: CacheManager
     @EnvironmentObject var settings: SettingsManager
 
     @State var story: HNItemLocalizable
+    @State var imageState: ViewState = .initialized
 
     var body: some View {
         if story.item.id != -1 {
@@ -29,11 +31,22 @@ struct StoryItemRow: View {
                                 .frame(width: 12, height: 12)
                                 .fixedSize()
                                 .clipShape(RoundedRectangle(cornerRadius: 2.0))
+                                .transition(.opacity)
                         } else {
                             Image(systemName: "globe")
                                 .resizable()
                                 .frame(width: 12, height: 12)
                                 .fixedSize()
+                                .task {
+                                    if imageState == .initialized {
+                                        imageState = .loadingInitialData
+                                        if let faviconData = await story.downloadFavicon() {
+                                            story.faviconData = faviconData
+                                            miniCache.cache(newItem: story)
+                                        }
+                                        imageState = .readyForPresentation
+                                    }
+                                }
                         }
                         Text(hostname)
                         Divider()

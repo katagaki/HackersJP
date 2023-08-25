@@ -54,7 +54,7 @@ struct HNItemLocalizable: Identifiable, Codable {
         return nil
     }
 
-    mutating func downloadFavicon() async {
+    func downloadFavicon() async -> Data? {
         if let url = item.url {
             do {
                 let downloadedFavicon = try await FaviconFinder(
@@ -66,11 +66,12 @@ struct HNItemLocalizable: Identifiable, Codable {
                         .webApplicationManifestFile: FaviconType.launcherIcon4x.rawValue
                     ]
                 ).downloadFavicon()
-                faviconData = downloadedFavicon.image.pngData()
+                return downloadedFavicon.image.pngData()
             } catch {
-                faviconData = nil
+                debugPrint(error.localizedDescription)
             }
         }
+        return nil
     }
 
     func textDeformatted() -> String? {

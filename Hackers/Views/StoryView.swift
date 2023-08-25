@@ -17,11 +17,11 @@ struct StoryView: View {
     let translator = Translator.translator(
         options: TranslatorOptions(sourceLanguage: .english,
                                    targetLanguage: .japanese))
-
+    
+    @State var state: ViewState = .initialized
     @State var story: HNItemLocalizable
     @State var comments: [HNItemLocalizable] = []
     @State var progressText: String = "準備中…"
-    @State var isFirstLoadCompleted: Bool = false
     @State var isSafariViewControllerPresenting: Bool = false
 
     var body: some View {
@@ -107,11 +107,12 @@ struct StoryView: View {
         }
         .listStyle(.plain)
         .task {
-            if !isFirstLoadCompleted {
+            if state == .initialized {
+                state = .loadingInitialData
                 progressText = "コメントを読み込み中…"
                 await refreshComments()
                 progressText = ""
-                isFirstLoadCompleted = true
+                state = .readyForInteraction
             }
         }
         .refreshable {
