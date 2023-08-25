@@ -81,31 +81,37 @@ struct StoriesView: View {
                         Image("TranslateBanner")
                     }
                 }
-                ToolbarItem(placement: .bottomBar) {
-                    HStack(alignment: .center, spacing: 2) {
-                        Button {
-                            Task {
-                                currentPage -= 1
-                                await refreshStoriesWithProgress()
-                            }
-                        } label: {
-                            Image(systemName: "arrowtriangle.left.fill")
+            }
+            .safeAreaInset(edge: .bottom, alignment: .center) {
+                HStack(alignment: .center, spacing: 2) {
+                    Button {
+                        Task {
+                            currentPage -= 1
+                            await refreshStoriesWithProgress()
                         }
-                        .disabled(!(progressText == "") || currentPage == 0)
-                        Spacer()
-                        Text("ページ \(currentPage + 1) / \(Int(ceil(Double(storyCount) / Double(settings.pageStoryCount))))")
-                        Spacer()
-                        Button {
-                            Task {
-                                currentPage += 1
-                                await refreshStoriesWithProgress()
-                            }
-                        } label: {
-                            Image(systemName: "arrowtriangle.right.fill")
-                        }
-                        .disabled(!(progressText == "") || currentPage + 1 >= Int(ceil(Double(storyCount) / Double(settings.pageStoryCount))))
+                    } label: {
+                        Image(systemName: "arrowtriangle.left.fill")
                     }
+                    .padding(.leading)
+                    .disabled(!(progressText == "") || currentPage == 0)
+                    Spacer()
+                    Text("ページ \(currentPage + 1) / \(Int(ceil(Double(storyCount) / Double(settings.pageStoryCount))))")
+                        .padding()
+                    Spacer()
+                    Button {
+                        Task {
+                            currentPage += 1
+                            await refreshStoriesWithProgress()
+                        }
+                    } label: {
+                        Image(systemName: "arrowtriangle.right.fill")
+                    }
+                    .padding(.trailing)
+                    .disabled(!(progressText == "") || currentPage + 1 >= Int(ceil(Double(storyCount) / Double(settings.pageStoryCount))))
                 }
+                .background(.regularMaterial,
+                            in: RoundedRectangle(cornerRadius: 99, style: .continuous))
+                .padding()
             }
             .overlay {
                 if errorText != "" {
