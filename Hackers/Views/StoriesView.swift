@@ -89,7 +89,7 @@ struct StoriesView: View {
                                 await refreshStoriesWithProgress()
                             }
                         } label: {
-                            Image(systemName: "arrowtriangle.left")
+                            Image(systemName: "arrowtriangle.left.fill")
                         }
                         .disabled(!(progressText == "") || currentPage == 0)
                         Spacer()
@@ -101,7 +101,7 @@ struct StoriesView: View {
                                 await refreshStoriesWithProgress()
                             }
                         } label: {
-                            Image(systemName: "arrowtriangle.right")
+                            Image(systemName: "arrowtriangle.right.fill")
                         }
                         .disabled(!(progressText == "") || currentPage + 1 >= Int(ceil(Double(storyCount) / Double(settings.pageStoryCount))))
                     }
@@ -181,18 +181,22 @@ struct StoriesView: View {
                             }
                         }
                         do {
-                            var storyItem = try await AF.request("\(apiEndpoint)/item/\(storyID).json",
+                            let storyItem = try await AF.request("\(apiEndpoint)/item/\(storyID).json",
                                                                  method: .get)
                                 .serializingDecodable(HNItem.self,
                                                       decoder: JSONDecoder()).value
-                            switch await type {
-                            case .show:
-                                storyItem.title = storyItem.title?.replacingOccurrences(of: "Show HN: ", with: "")
-                            default: break
-                            }
                             var newLocalizableItem = HNItemLocalizable(item: storyItem)
-                            newLocalizableItem.titleLocalized = try await translator
-                                .translate(storyItem.title ?? "")
+                            if let title = newLocalizableItem.item.title {
+                                if title.starts(with: "Show HN: ") {
+                                    newLocalizableItem.isShowHNStory = true
+                                    newLocalizableItem.item.title = title.replacingOccurrences(of: "Show HN: ", with: "")
+                                    newLocalizableItem.titleLocalized = try await translator
+                                        .translate(title.replacingOccurrences(of: "Show HN: ", with: ""))
+                                } else {
+                                    newLocalizableItem.titleLocalized = try await translator
+                                        .translate(title)
+                                }
+                            }
                             if let textDeformatted = newLocalizableItem.textDeformatted() {
                                 newLocalizableItem.textLocalized = try await translator
                                     .translate(textDeformatted)

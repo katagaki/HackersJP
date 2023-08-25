@@ -51,6 +51,10 @@ struct StoryItemRow: View {
                         Text(hostname)
                         Divider()
                     }
+                    if story.isShowHNStory {
+                        Text("展示")
+                        Divider()
+                    }
                     Text(Date(timeIntervalSince1970: TimeInterval(story.item.time)),
                          style: .relative)
                 }

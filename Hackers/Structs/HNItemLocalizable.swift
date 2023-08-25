@@ -22,6 +22,7 @@ struct HNItemLocalizable: Identifiable, Codable {
 
     var titleLocalized: String = ""
     var textLocalized: String = ""
+    var isShowHNStory: Bool = false
     var faviconData: Data? = nil
     var cacheDate: Date? = nil
 
