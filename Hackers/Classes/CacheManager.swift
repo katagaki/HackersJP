@@ -42,7 +42,7 @@ class CacheManager: ObservableObject {
 
     func clear() {
         items.removeAll()
-        saveCache()
+        save()
     }
 
     func cache(newItem: HNItemLocalizable) {
@@ -51,7 +51,7 @@ class CacheManager: ObservableObject {
                 items.removeValue(forKey: newItem.item.id)
             }
             items[newItem.item.id] = newItem
-            saveCache()
+            save()
         }
     }
 
@@ -63,12 +63,25 @@ class CacheManager: ObservableObject {
         }
     }
 
-    func saveCache() {
+    func save() {
         do {
             let encoded = try encoder.encode(items)
             defaults.set(encoded, forKey: "MiniCache")
         } catch {
             debugPrint(error.localizedDescription)
+        }
+    }
+    
+    func cleanUp() {
+        let now = Date()
+        for (key, value) in items {
+            if let cacheDate = value.cacheDate {
+                if Calendar.current.dateComponents([.day], from: cacheDate, to: now).day ?? 0 >= 7 {
+                    items[key] = nil
+                }
+            } else {
+                items[key] = nil
+            }
         }
     }
 }

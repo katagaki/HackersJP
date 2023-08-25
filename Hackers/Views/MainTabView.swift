@@ -10,6 +10,7 @@ import SwiftUI
 
 struct MainTabView: View {
 
+    @EnvironmentObject var miniCache: CacheManager
     @EnvironmentObject var settings: SettingsManager
 
     @State var defaultTab: Int = 0
@@ -43,6 +44,7 @@ struct MainTabView: View {
         }
         .task {
             defaultTab = settings.startupTab
+            miniCache.cleanUp()
         }
     }
 }
