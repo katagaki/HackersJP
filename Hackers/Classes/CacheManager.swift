@@ -12,12 +12,12 @@ class CacheManager: ObservableObject {
     let defaults = UserDefaults.standard
     let encoder = JSONEncoder()
     let decoder = JSONDecoder()
-    @Published var items: [HNItemLocalizable] = []
+    @Published var items: [Int: HNItemLocalizable] = [:]
 
     init() {
         if defaults.value(forKey: "MiniCache") == nil {
             do {
-                let encoded = try encoder.encode([HNItemLocalizable]())
+                let encoded = try encoder.encode([Int: HNItemLocalizable]())
                 defaults.set(encoded, forKey: "MiniCache")
             } catch {
                 debugPrint(error.localizedDescription)
@@ -26,7 +26,7 @@ class CacheManager: ObservableObject {
         
         do {
             if let data = defaults.data(forKey: "MiniCache") {
-                items = try decoder.decode([HNItemLocalizable].self, from: data)
+                items = try decoder.decode([Int: HNItemLocalizable].self, from: data)
             }
         } catch {
             debugPrint(error.localizedDescription)
@@ -41,24 +41,22 @@ class CacheManager: ObservableObject {
     }
 
     func clear() {
-        items = []
+        items.removeAll()
         saveCache()
     }
 
     func cache(newItem: HNItemLocalizable) {
         DispatchQueue.main.async { [self] in
-            items.removeAll { item in
-                item.item.id == newItem.id
+            if items[newItem.item.id] != nil {
+                items.removeValue(forKey: newItem.item.id)
             }
-            items.append(newItem)
+            items[newItem.item.id] = newItem
             saveCache()
         }
     }
 
     func item(for id: Int) -> HNItemLocalizable? {
-        if let item = items.first(where: { item in
-            item.item.id == id
-        }) {
+        if let item = items[id] {
             return item
         } else {
             return nil

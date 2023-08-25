@@ -68,7 +68,6 @@ struct HNItemLocalizable: Identifiable, Codable {
                 ).downloadFavicon()
                 faviconData = downloadedFavicon.image.pngData()
             } catch {
-                debugPrint("Favicon not found.")
                 faviconData = nil
             }
         }

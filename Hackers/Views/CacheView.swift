@@ -34,7 +34,9 @@ struct CacheView: View {
                     .font(.body)
             }
             Section {
-                ForEach(miniCache.items) { cachedItem in
+                ForEach(Array(miniCache.items.values.sorted(by: { lhs, rhs in
+                    lhs.id < rhs.id
+                }))) { cachedItem in
                     HStack(alignment: .center, spacing: 8) {
                         Text(String(cachedItem.item.id))
                             .font(.body)

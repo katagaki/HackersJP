@@ -145,18 +145,15 @@ struct StoryView: View {
                 group.addTask {
                     if useCache {
                         if let cachedComment = await miniCache.item(for: commentID) {
-                            debugPrint("Using cache for \(commentID).")
                             return cachedComment
                         }
                     }
                     do {
                         let jsonURL = "\(apiEndpoint)/item/\(commentID).json"
-                        debugPrint("Fetching data from \(jsonURL).")
                         let commentItem = try await AF.request(jsonURL, method: .get)
                             .serializingDecodable(HNItem.self,
                                                   decoder: JSONDecoder()).value
                         var newLocalizableItem = HNItemLocalizable(item: commentItem)
-                        debugPrint("Translating HN item \(commentID).")
                         if let textDeformatted = newLocalizableItem.textDeformatted() {
                             newLocalizableItem.textLocalized = try await translator
                                 .translate(textDeformatted)

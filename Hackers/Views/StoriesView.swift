@@ -163,7 +163,6 @@ struct StoriesView: View {
         do {
             errorText = ""
             let jsonURL = "\(apiEndpoint)/\(type.getConfig().jsonName).json"
-            debugPrint("Fetching data from \(jsonURL).")
             let storyIDs = try await AF.request(jsonURL, method: .get)
                 .serializingDecodable([Int].self,
                                       decoder: JSONDecoder()).value
@@ -176,12 +175,10 @@ struct StoriesView: View {
                     group.addTask {
                         if useCache {
                             if let cachedStory = await miniCache.item(for: storyID) {
-                                debugPrint("Using cache for \(storyID).")
                                 return cachedStory
                             }
                         }
                         do {
-                            debugPrint("Getting HN item \(storyID).")
                             var storyItem = try await AF.request("\(apiEndpoint)/item/\(storyID).json",
                                                                  method: .get)
                                 .serializingDecodable(HNItem.self,
@@ -192,7 +189,6 @@ struct StoriesView: View {
                             default: break
                             }
                             var newLocalizableItem = HNItemLocalizable(item: storyItem)
-                            debugPrint("Translating HN item \(storyID).")
                             newLocalizableItem.titleLocalized = try await translator
                                 .translate(storyItem.title ?? "")
                             if let textDeformatted = newLocalizableItem.textDeformatted() {
@@ -202,7 +198,6 @@ struct StoriesView: View {
                                 newLocalizableItem.textLocalized = try await translator
                                     .translate(storyItem.text ?? "")
                             }
-                            debugPrint("Downloading favicon for HN item \(storyID).")
                             await newLocalizableItem.downloadFavicon()
                             newLocalizableItem.cacheDate = Date()
                             await miniCache.cache(newItem: newLocalizableItem)
