@@ -9,12 +9,14 @@ import SwiftUI
 
 @main
 struct HackersApp: App {
-
+    
+    @StateObject var miniCache = CacheManager()
     @StateObject var settings = SettingsManager()
 
     var body: some Scene {
         WindowGroup {
             MainTabView()
+                .environmentObject(miniCache)
                 .environmentObject(settings)
         }
     }

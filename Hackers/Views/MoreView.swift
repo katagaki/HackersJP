@@ -26,6 +26,13 @@ struct MoreView: View {
                         ListRow(image: "ListIcon.Startup",
                                 title: "デフォルトタブ")
                     }
+                    NavigationLink {
+                        CacheView()
+                    } label: {
+                        ListRow(image: "ListIcon.Cache",
+                                title: "キャッシュ管理")
+                    }
+
                 } header: {
                     ListSectionHeader(text: "一般")
                         .font(.body)
@@ -65,8 +72,18 @@ struct MoreView: View {
                             .tag(1)
                     } label: {
                         ListRow(image: "ListIcon.Language.Title",
-                                title: "タイトル",
-                                subtitle: settings.titleLanguage == 0 ? "ML Kitを使用してオフラインで翻訳されます。" : "英語の原文で表示されます。")
+                                title: "タイトルおよび内容",
+                                subtitle: settings.titleLanguage == 0 ? "オフラインで翻訳されます。" : "英語の原文で表示されます。")
+                    }
+                    Picker(selection: $settings.commentLanguage) {
+                        Text("日本語")
+                            .tag(0)
+                        Text("英語")
+                            .tag(1)
+                    } label: {
+                        ListRow(image: "ListIcon.Language.Comment",
+                                title: "コメント",
+                                subtitle: settings.commentLanguage == 0 ? "オフラインで翻訳されます。" : "英語の原文で表示されます。")
                     }
                     Picker(selection: $settings.linkLanguage) {
                         Text("日本語")
@@ -76,7 +93,7 @@ struct MoreView: View {
                     } label: {
                         ListRow(image: "ListIcon.Language.Article",
                                 title: "記事",
-                                subtitle: settings.linkLanguage == 0 ? "Google翻訳を使用して翻訳されます。" : "元の記事を開きます。")
+                                subtitle: settings.linkLanguage == 0 ? "翻訳されたページを開きます。" : "元の記事を開きます。")
                     }
                 } header: {
                     ListSectionHeader(text: "言語")

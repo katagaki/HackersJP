@@ -11,6 +11,7 @@ import SwiftUI
 
 struct StoriesView: View {
 
+    @EnvironmentObject var miniCache: CacheManager
     @EnvironmentObject var settings: SettingsManager
 
     let translator = Translator.translator(
@@ -29,15 +30,31 @@ struct StoriesView: View {
     var body: some View {
         NavigationStack {
             List(stories, id: \.item.id, rowContent: { story in
-                Button {
-                    selectedStory = story
-                } label: {
-                    HStack {
-                        StoryItemView(story: story)
-                        Spacer()
+                if type == .job {
+                    if story.item.url != nil {
+                        Button {
+                            selectedStory = story
+                        } label: {
+                            HStack {
+                                StoryItemRow(story: story)
+                                Spacer()
+                            }
+                        }
+                        .contentShape(Rectangle())
+                    } else {
+                        NavigationLink {
+                            StoryView(story: story)
+                        } label: {
+                            StoryItemRow(story: story)
+                        }
+                    }
+                } else {
+                    NavigationLink {
+                        StoryView(story: story)
+                    } label: {
+                        StoryItemRow(story: story)
                     }
                 }
-                .contentShape(Rectangle())
             })
             .task {
                 if !isFirstLoadCompleted {
@@ -54,10 +71,10 @@ struct StoriesView: View {
                 }
             }
             .refreshable {
-                await refreshStories()
+                await refreshStories(useCache: false)
             }
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     if settings.titleLanguage == 0 {
                         Image("TranslateBanner")
                     }
@@ -142,7 +159,7 @@ struct StoriesView: View {
         progressText = ""
     }
 
-    func refreshStories() async {
+    func refreshStories(useCache: Bool = true) async {
         do {
             errorText = ""
             let jsonURL = "\(apiEndpoint)/\(type.getConfig().jsonName).json"
@@ -157,6 +174,12 @@ struct StoriesView: View {
                 let currentStartingIndex = currentPage * settings.pageStoryCount
                 for storyID in storyIDs[currentStartingIndex..<min(storyIDs.count, currentStartingIndex + settings.pageStoryCount)] {
                     group.addTask {
+                        if useCache {
+                            if let cachedStory = await miniCache.item(for: storyID) {
+                                debugPrint("Using cache for \(storyID).")
+                                return cachedStory
+                            }
+                        }
                         do {
                             debugPrint("Getting HN item \(storyID).")
                             var storyItem = try await AF.request("\(apiEndpoint)/item/\(storyID).json",
@@ -168,12 +191,21 @@ struct StoriesView: View {
                                 storyItem.title = storyItem.title?.replacingOccurrences(of: "Show HN: ", with: "")
                             default: break
                             }
-                            var newLocalizableItem = HNItemLocalizable(
-                                titleLocalized: "",
-                                item: storyItem)
+                            var newLocalizableItem = HNItemLocalizable(item: storyItem)
                             debugPrint("Translating HN item \(storyID).")
                             newLocalizableItem.titleLocalized = try await translator
                                 .translate(storyItem.title ?? "")
+                            if let textDeformatted = newLocalizableItem.textDeformatted() {
+                                newLocalizableItem.textLocalized = try await translator
+                                    .translate(textDeformatted)
+                            } else {
+                                newLocalizableItem.textLocalized = try await translator
+                                    .translate(storyItem.text ?? "")
+                            }
+                            debugPrint("Downloading favicon for HN item \(storyID).")
+                            await newLocalizableItem.downloadFavicon()
+                            newLocalizableItem.cacheDate = Date()
+                            await miniCache.cache(newItem: newLocalizableItem)
                             return newLocalizableItem
                         } catch {
                             return nil

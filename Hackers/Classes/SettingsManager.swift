@@ -18,6 +18,7 @@ class SettingsManager: ObservableObject {
     @Published var pageStoryCount: Int = 10
     @Published var titleLanguage: Int = 0
     @Published var linkLanguage: Int = 0
+    @Published var commentLanguage: Int = 0
 
     init() {
         // Detect if version changed
@@ -43,6 +44,9 @@ class SettingsManager: ObservableObject {
         if defaults.value(forKey: "LinkLanguage") == nil {
             defaults.setValue(0, forKey: "LinkLanguage")
         }
+        if defaults.value(forKey: "CommentLanguage") == nil {
+            defaults.setValue(0, forKey: "CommentLanguage")
+        }
 
         // Load configuration into global variables
         startupTab = defaults.integer(forKey: "StartupTab")
@@ -51,6 +55,7 @@ class SettingsManager: ObservableObject {
         pageStoryCount = defaults.integer(forKey: "PageStoryCount")
         titleLanguage = defaults.integer(forKey: "TitleLanguage")
         linkLanguage = defaults.integer(forKey: "LinkLanguage")
+        commentLanguage = defaults.integer(forKey: "CommentLanguage")
     }
 
     func set(_ value: Any?, forKey key: String) {
@@ -80,6 +85,11 @@ class SettingsManager: ObservableObject {
     func setLinkLanguage(_ newValue: Int) {
         defaults.set(newValue, forKey: "LinkLanguage")
         linkLanguage = newValue
+    }
+
+    func setCommentLanguage(_ newValue: Int) {
+        defaults.set(newValue, forKey: "CommentLanguage")
+        commentLanguage = newValue
     }
 
 }
