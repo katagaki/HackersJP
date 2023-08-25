@@ -1,5 +1,7 @@
 # HackersJP
 
+![Banner image depicting the Hackers app showing lists of stories and comments.](github/banner.png?raw=true "Hackers")
+
 A Hacker News app for Japanese readers.
 
 **Download: [TestFlight](https://testflight.apple.com/join/wNgIKzEh)**
@@ -8,13 +10,14 @@ A Hacker News app for Japanese readers.
 
 ### What works
 - Viewing top 30 stories
-- Opening stories with URLs
+- Viewing Jobs and Show HN articles
+- Support for other HN sorts
+- Support for viewing comments
+- Opening story URLs
+- Sharing story and HN URLs
 - Automatic translation of story titles to Japanese using Google's ML Kit
 
 ### What's planned
-- Support for other HN sorts
-- Support for viewing comments
-- Viewing Jobs and Show HN articles
 - Paginated scrolling
 
 ## Building
