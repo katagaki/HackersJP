@@ -26,7 +26,7 @@ struct MainTabView: View {
             StoriesView(type: .job)
                 .tabItem {
                     Text("求人")
-                    Image(systemName: "person.bubble.fill")
+                    Image(systemName: "info.bubble.fill")
                 }
                 .tag(1)
             StoriesView(type: .show)

@@ -31,6 +31,7 @@
 		E477E72C2A95F94600517B72 /* ListRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E477E72B2A95F94600517B72 /* ListRow.swift */; };
 		E477E72E2A95F9BE00517B72 /* ListSectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = E477E72D2A95F9BE00517B72 /* ListSectionHeader.swift */; };
 		E47FC65E2A97BBB1006BBCF9 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47FC65D2A97BBB1006BBCF9 /* SettingsManager.swift */; };
+		E48A02782A9A0DCA00C31F40 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E48A02772A9A0DCA00C31F40 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -62,6 +63,7 @@
 		E477E72B2A95F94600517B72 /* ListRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListRow.swift; sourceTree = "<group>"; };
 		E477E72D2A95F9BE00517B72 /* ListSectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListSectionHeader.swift; sourceTree = "<group>"; };
 		E47FC65D2A97BBB1006BBCF9 /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
+		E48A02772A9A0DCA00C31F40 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,6 +148,7 @@
 			children = (
 				E46652D42A94FE280048BA05 /* Info.plist */,
 				E46652BB2A9463CE0048BA05 /* Assets.xcassets */,
+				E48A02772A9A0DCA00C31F40 /* LaunchScreen.storyboard */,
 				E46652BD2A9463CE0048BA05 /* Hackers.entitlements */,
 				E46652B72A9463CB0048BA05 /* App.swift */,
 				E43C43962A9861A00011FE82 /* API */,
@@ -254,6 +257,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E46652BC2A9463CE0048BA05 /* Assets.xcassets in Resources */,
+				E48A02782A9A0DCA00C31F40 /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -490,6 +494,7 @@
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -534,6 +539,7 @@
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
