@@ -34,6 +34,8 @@
 		E48A02782A9A0DCA00C31F40 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E48A02772A9A0DCA00C31F40 /* LaunchScreen.storyboard */; };
 		E4EB91D92A9CB42F00C0C93C /* StoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4EB91D82A9CB42F00C0C93C /* StoryManager.swift */; };
 		E4EB91DB2A9CB61300C0C93C /* Paginator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4EB91DA2A9CB61300C0C93C /* Paginator.swift */; };
+		E4EB91DD2A9CE6B100C0C93C /* Overlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4EB91DC2A9CE6B100C0C93C /* Overlay.swift */; };
+		E4EB91DF2A9CE70100C0C93C /* OverlayMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4EB91DE2A9CE70100C0C93C /* OverlayMode.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -68,6 +70,8 @@
 		E48A02772A9A0DCA00C31F40 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E4EB91D82A9CB42F00C0C93C /* StoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryManager.swift; sourceTree = "<group>"; };
 		E4EB91DA2A9CB61300C0C93C /* Paginator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Paginator.swift; sourceTree = "<group>"; };
+		E4EB91DC2A9CE6B100C0C93C /* Overlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Overlay.swift; sourceTree = "<group>"; };
+		E4EB91DE2A9CE70100C0C93C /* OverlayMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayMode.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,6 +174,7 @@
 			isa = PBXGroup;
 			children = (
 				E477E7272A95F0EC00517B72 /* HNStoryType.swift */,
+				E4EB91DE2A9CE70100C0C93C /* OverlayMode.swift */,
 				E43C439F2A98ED9B0011FE82 /* ViewState.swift */,
 			);
 			path = Enums;
@@ -213,6 +218,7 @@
 				E477E72D2A95F9BE00517B72 /* ListSectionHeader.swift */,
 				E477E72B2A95F94600517B72 /* ListRow.swift */,
 				E4EB91DA2A9CB61300C0C93C /* Paginator.swift */,
+				E4EB91DC2A9CE6B100C0C93C /* Overlay.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -365,8 +371,10 @@
 				E41D15352A95B7E4008B686B /* License.swift in Sources */,
 				E46652CE2A9473720048BA05 /* StoriesView.swift in Sources */,
 				E46652C72A94686B0048BA05 /* HNItem.swift in Sources */,
+				E4EB91DD2A9CE6B100C0C93C /* Overlay.swift in Sources */,
 				E43C439C2A9872DC0011FE82 /* CacheView.swift in Sources */,
 				E477E7222A95D7FD00517B72 /* SafariView.swift in Sources */,
+				E4EB91DF2A9CE70100C0C93C /* OverlayMode.swift in Sources */,
 				E41D15332A95B00C008B686B /* StoryItemRow.swift in Sources */,
 				E43C43982A9861A90011FE82 /* Global.swift in Sources */,
 				E46652CC2A94690B0048BA05 /* LicensesView.swift in Sources */,

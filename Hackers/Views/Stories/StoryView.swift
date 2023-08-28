@@ -164,6 +164,7 @@ struct StoryView: View {
                                 .translate(commentItem.text ?? "")
                         }
                         newLocalizableItem.cacheDate = Date()
+                        await miniCache.cache(newItem: newLocalizableItem)
                         return newLocalizableItem
                     } catch {
                         return nil
@@ -177,8 +178,5 @@ struct StoryView: View {
             }
             return comments
         })
-        for comment in comments {
-            miniCache.cache(newItem: comment)
-        }
     }
 }

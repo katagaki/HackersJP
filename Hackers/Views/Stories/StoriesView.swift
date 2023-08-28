@@ -75,6 +75,7 @@ struct StoriesView: View {
                     Task {
                         currentPage -= 1
                         isOverlayShowing = true
+                        cacheStories()
                         await refreshStories()
                         isOverlayShowing = false
                     }
@@ -82,6 +83,7 @@ struct StoriesView: View {
                     Task {
                         currentPage += 1
                         isOverlayShowing = true
+                        cacheStories()
                         await refreshStories()
                         isOverlayShowing = false
                     }
@@ -94,30 +96,10 @@ struct StoriesView: View {
             .overlay {
                 ZStack {
                     if isOverlayShowing {
-                        VStack(alignment: .center, spacing: 8) {
-                            switch overlayMode {
-                            case .progress:
-                                ProgressView(value: Double(overlayCurrent),
-                                             total: Double(overlayTotal))
-                                .progressViewStyle(.linear)
-                                .frame(width: 200.0)
-                            case .error:
-                                Image(systemName: "exclamationmark.triangle.fill")
-                                    .symbolRenderingMode(.multicolor)
-                                    .font(.largeTitle)
-                            }
-                            Text(overlayText)
-                                .font(.body)
-                            if overlayMode == .progress {
-                                Text("\(overlayCurrent) / \(overlayTotal)")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                        .padding()
-                        .background(.regularMaterial)
-                        .clipShape(RoundedRectangle(cornerRadius: 8.0))
-                        .padding()
+                        Overlay(overlayMode: $overlayMode,
+                                overlayText: $overlayText,
+                                overlayCurrent: $overlayCurrent,
+                                overlayTotal: $overlayTotal)
                     }
                 }
                 .animation(.snappy, value: isOverlayShowing)
@@ -133,7 +115,6 @@ struct StoriesView: View {
                         .ignoresSafeArea()
                 }
             })
-            .listStyle(.plain)
             .onChange(of: settings.feedSort, perform: { _ in
                 Task {
                     currentPage = 0
@@ -149,6 +130,7 @@ struct StoriesView: View {
                     await refreshStories()
                 }
             })
+            .listStyle(.plain)
             .navigationTitle(type.getConfig().viewTitle)
         }
     }
@@ -172,7 +154,7 @@ struct StoriesView: View {
             let currentStartingIndex = currentPage * settings.pageStoryCount
             overlayTotal = settings.pageStoryCount
             for storyID in storyIDs[currentStartingIndex..<min(storyIDs.count, currentStartingIndex + settings.pageStoryCount)] {
-                group.addTask {
+                group.addTask(priority: .high) {
                     if useCache,
                        let cachedStory = await miniCache.item(for: storyID) {
                         debugPrint("[\(storyID)] Using cache...")
@@ -183,35 +165,9 @@ struct StoriesView: View {
                     } else {
                         do {
                             debugPrint("[\(storyID)] Fetching story...")
-                            let storyItem = try await AF.request("\(apiEndpoint)/item/\(storyID).json",
-                                                                 method: .get)
-                                .serializingDecodable(HNItem.self,
-                                                      decoder: JSONDecoder()).value
-                            debugPrint("[\(storyID)] Creating localizable object...")
-                            var newLocalizableItem = HNItemLocalizable(item: storyItem)
-                            debugPrint("[\(storyID)] Localizing title...")
-                            if let title = newLocalizableItem.item.title {
-                                if title.starts(with: "Show HN: ") {
-                                    newLocalizableItem.isShowHNStory = true
-                                    newLocalizableItem.item.title = title.replacingOccurrences(of: "Show HN: ", with: "")
-                                    newLocalizableItem.titleLocalized = try await translator
-                                        .translate(title.replacingOccurrences(of: "Show HN: ", with: ""))
-                                } else {
-                                    newLocalizableItem.titleLocalized = try await translator
-                                        .translate(title)
-                                }
-                            }
-                            debugPrint("[\(storyID)] Localizing text...")
-                            if let textDeformatted = newLocalizableItem.textDeformatted() {
-                                newLocalizableItem.textLocalized = try await translator
-                                    .translate(textDeformatted)
-                            } else {
-                                newLocalizableItem.textLocalized = try await translator
-                                    .translate(storyItem.text ?? "")
-                            }
+                            var newLocalizableItem = try await fetchStory(storyID: storyID)
                             debugPrint("[\(storyID)] Setting cache date...")
                             newLocalizableItem.cacheDate = Date()
-                            await miniCache.cache(newItem: newLocalizableItem)
                             DispatchQueue.main.async {
                                 overlayCurrent += 1
                             }
@@ -229,6 +185,7 @@ struct StoriesView: View {
             }
             return stories
         })
+        cacheStories()
         overlayCurrent = 0
         overlayTotal = 0
         switch type {
@@ -241,12 +198,54 @@ struct StoriesView: View {
         }
         overlayText = ""
     }
+    
+    func fetchStory(storyID: Int) async throws -> HNItemLocalizable {
+        let storyItem = try await AF.request("\(apiEndpoint)/item/\(storyID).json",
+                                             method: .get)
+            .serializingDecodable(HNItem.self,
+                                  decoder: JSONDecoder()).value
+        debugPrint("[\(storyID)] Creating localizable object...")
+        var newLocalizableItem = HNItemLocalizable(item: storyItem)
+        debugPrint("[\(storyID)] Localizing title...")
+        if let title = newLocalizableItem.item.title {
+            if title.starts(with: "Show HN: ") {
+                newLocalizableItem.isShowHNStory = true
+                newLocalizableItem.item.title = title.replacingOccurrences(of: "Show HN: ", with: "")
+                newLocalizableItem.titleLocalized = try await translator
+                    .translate(title.replacingOccurrences(of: "Show HN: ", with: ""))
+            } else {
+                newLocalizableItem.titleLocalized = try await translator
+                    .translate(title)
+            }
+        }
+        debugPrint("[\(storyID)] Localizing text...")
+        if let textDeformatted = newLocalizableItem.textDeformatted() {
+            newLocalizableItem.textLocalized = try await translator
+                .translate(textDeformatted)
+        } else {
+            newLocalizableItem.textLocalized = try await translator
+                .translate(storyItem.text ?? "")
+        }
+        return newLocalizableItem
+    }
 
     func downloadTranslationModel() async throws {
         overlayMode = .progress
         overlayText = "翻訳用リソースをダウンロード中…"
         try await translator.downloadModelIfNeeded()
         overlayText = ""
+    }
+
+    func cacheStories() {
+        for story in stories.feed {
+            miniCache.cache(newItem: story)
+        }
+        for story in stories.jobs {
+            miniCache.cache(newItem: story)
+        }
+        for story in stories.showStories {
+            miniCache.cache(newItem: story)
+        }
     }
 
     @ViewBuilder
@@ -289,10 +288,5 @@ struct StoriesView: View {
                 }
             })
         }
-    }
-
-    enum OverlayMode {
-        case progress
-        case error
     }
 }

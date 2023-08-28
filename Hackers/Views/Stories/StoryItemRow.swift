@@ -66,10 +66,8 @@ struct StoryItemRow: View {
                         if let fetchedFaviconData = await story.downloadFavicon() {
                             favicon = UIImage(data: fetchedFaviconData)
                             story.faviconData = fetchedFaviconData
-                            miniCache.cache(newItem: story)
                         } else {
                             story.faviconWasNotFoundOnLastFetch = true
-                            miniCache.cache(newItem: story)
                         }
                     }
                     state = .readyForPresentation
