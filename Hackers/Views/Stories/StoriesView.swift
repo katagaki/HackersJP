@@ -21,11 +21,12 @@ struct StoriesView: View {
     
     @State var state: ViewState = .initialized
     @State var type: HNStoryType
+    @State var storyIDs: [Int] = []
     @State var selectedStory: HNItemLocalizable? = nil
-    @State var progressText: String = "準備中…"
-    @State var errorText: String = ""
+    @State var isOverlayShowing: Bool = false
+    @State var overlayMode: OverlayMode = .progress
+    @State var overlayText: String = "準備中…"
     @State var currentPage: Int = 0
-    @State var storyCount: Int = 0
 
     var body: some View {
         NavigationStack {
@@ -34,20 +35,29 @@ struct StoriesView: View {
                 if state == .initialized {
                     do {
                         state = .loadingInitialData
-                        progressText = "翻訳用リソースをダウンロード中…"
-                        try await translator.downloadModelIfNeeded()
-                        progressText = "記事を読み込み中…"
+                        isOverlayShowing = true
+                        try await downloadTranslationModel()
+                        try await refreshStoryIDs()
                         await refreshStories()
-                        progressText = ""
+                        isOverlayShowing = false
                         state = .readyForInteraction
                     } catch {
-                        errorText = error.localizedDescription
+                        overlayMode = .error
+                        overlayText = error.localizedDescription
                         state = .initialized
                     }
                 }
             }
             .refreshable {
-                await refreshStories(useCache: false)
+                do {
+                    try await refreshStoryIDs()
+                    await refreshStories(useCache: false)
+                    currentPage = 0
+                } catch {
+                    overlayMode = .error
+                    overlayText = error.localizedDescription
+                    state = .initialized
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -58,38 +68,48 @@ struct StoriesView: View {
             }
             .safeAreaInset(edge: .bottom, alignment: .center) {
                 Paginator(currentPage: $currentPage, 
-                          totalPages: .constant((Int(ceil(Double(storyCount) /
+                          totalPages: .constant((Int(ceil(Double(storyIDs.count) /
                                                           Double(settings.pageStoryCount)))))) {
                     Task {
                         currentPage -= 1
-                        await refreshStoriesWithProgress()
+                        isOverlayShowing = true
+                        await refreshStories()
+                        isOverlayShowing = false
                     }
                 } nextAction: {
                     Task {
                         currentPage += 1
-                        await refreshStoriesWithProgress()
+                        isOverlayShowing = true
+                        await refreshStories()
+                        isOverlayShowing = false
                     }
                 }
-                .disabled(progressText != "")
+                .disabled(isOverlayShowing)
                 .background(.regularMaterial,
                             in: RoundedRectangle(cornerRadius: 99, style: .continuous))
                 .padding()
             }
             .overlay {
-                if errorText != "" {
-                    VStack(alignment: .center, spacing: 8) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .symbolRenderingMode(.multicolor)
-                            .font(.largeTitle)
-                        Text(errorText)
-                    }
-                } else if progressText != "" {
-                    VStack(alignment: .center, spacing: 8) {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                        Text(progressText)
+                ZStack {
+                    if isOverlayShowing {
+                        VStack(alignment: .center, spacing: 8) {
+                            switch overlayMode {
+                            case .progress:
+                                ProgressView()
+                                    .progressViewStyle(.circular)
+                            case .error:
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .symbolRenderingMode(.multicolor)
+                                    .font(.largeTitle)
+                            }
+                            Text(overlayText)
+                        }
+                        .padding()
+                        .background(.regularMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 8.0))
                     }
                 }
+                .animation(.snappy, value: isOverlayShowing)
             }
             .sheet(item: $selectedStory, onDismiss: {
                 selectedStory = nil
@@ -108,111 +128,107 @@ struct StoriesView: View {
                     currentPage = 0
                     if type == .top || type == .new || type == .best {
                         type = settings.feedSort
-                        await refreshStoriesWithProgress()
+                        await refreshStories()
                     }
                 }
             })
             .onChange(of: settings.pageStoryCount, perform: { _ in
                 Task {
                     currentPage = 0
-                    await refreshStoriesWithProgress()
+                    await refreshStories()
                 }
             })
             .navigationTitle(type.getConfig().viewTitle)
         }
     }
 
-    func refreshStoriesWithProgress() async {
-        switch type {
-        case .top, .new, .best:
-            stories.feed.removeAll()
-        case .show:
-            stories.showStories.removeAll()
-        case .job:
-            stories.jobs.removeAll()
-        }
-        progressText = "記事を読み込み中…"
-        await refreshStories()
-        progressText = ""
+    func refreshStoryIDs() async throws {
+        overlayMode = .progress
+        overlayText = "記事を読み込み中…"
+        let jsonURL = "\(apiEndpoint)/\(type.getConfig().jsonName).json"
+        storyIDs = try await AF.request(jsonURL, method: .get)
+            .serializingDecodable([Int].self,
+                                  decoder: JSONDecoder()).value
+        overlayText = ""
     }
 
     func refreshStories(useCache: Bool = true) async {
-        do {
-            errorText = ""
-            let jsonURL = "\(apiEndpoint)/\(type.getConfig().jsonName).json"
-            let storyIDs = try await AF.request(jsonURL, method: .get)
-                .serializingDecodable([Int].self,
-                                      decoder: JSONDecoder()).value
-            storyCount = storyIDs.count
-            let fetchedStories = await withTaskGroup(of: HNItemLocalizable?.self,
-                                          returning: [HNItemLocalizable].self, body: { group in
-                var stories: [HNItemLocalizable] = []
-                let currentStartingIndex = currentPage * settings.pageStoryCount
-                for storyID in storyIDs[currentStartingIndex..<min(storyIDs.count, currentStartingIndex + settings.pageStoryCount)] {
-                    group.addTask {
-                        if useCache,
-                           let cachedStory = await miniCache.item(for: storyID) {
-                            debugPrint("[\(storyID)] Using cache...")
-                            return cachedStory
-                        } else {
-                            do {
-                                debugPrint("[\(storyID)] Fetching story...")
-                                let storyItem = try await AF.request("\(apiEndpoint)/item/\(storyID).json",
-                                                                     method: .get)
-                                    .serializingDecodable(HNItem.self,
-                                                          decoder: JSONDecoder()).value
-                                debugPrint("[\(storyID)] Creating localizable object...")
-                                var newLocalizableItem = HNItemLocalizable(item: storyItem)
-                                debugPrint("[\(storyID)] Localizing title...")
-                                if let title = newLocalizableItem.item.title {
-                                    if title.starts(with: "Show HN: ") {
-                                        newLocalizableItem.isShowHNStory = true
-                                        newLocalizableItem.item.title = title.replacingOccurrences(of: "Show HN: ", with: "")
-                                        newLocalizableItem.titleLocalized = try await translator
-                                            .translate(title.replacingOccurrences(of: "Show HN: ", with: ""))
-                                    } else {
-                                        newLocalizableItem.titleLocalized = try await translator
-                                            .translate(title)
-                                    }
-                                }
-                                debugPrint("[\(storyID)] Localizing text...")
-                                if let textDeformatted = newLocalizableItem.textDeformatted() {
-                                    newLocalizableItem.textLocalized = try await translator
-                                        .translate(textDeformatted)
+        overlayMode = .progress
+        overlayText = "記事内容を読み込み中…"
+        let fetchedStories = await withTaskGroup(of: HNItemLocalizable?.self,
+                                      returning: [HNItemLocalizable].self, body: { group in
+            var stories: [HNItemLocalizable] = []
+            let currentStartingIndex = currentPage * settings.pageStoryCount
+            for storyID in storyIDs[currentStartingIndex..<min(storyIDs.count, currentStartingIndex + settings.pageStoryCount)] {
+                group.addTask {
+                    if useCache,
+                       let cachedStory = await miniCache.item(for: storyID) {
+                        debugPrint("[\(storyID)] Using cache...")
+                        return cachedStory
+                    } else {
+                        do {
+                            debugPrint("[\(storyID)] Fetching story...")
+                            let storyItem = try await AF.request("\(apiEndpoint)/item/\(storyID).json",
+                                                                 method: .get)
+                                .serializingDecodable(HNItem.self,
+                                                      decoder: JSONDecoder()).value
+                            debugPrint("[\(storyID)] Creating localizable object...")
+                            var newLocalizableItem = HNItemLocalizable(item: storyItem)
+                            debugPrint("[\(storyID)] Localizing title...")
+                            if let title = newLocalizableItem.item.title {
+                                if title.starts(with: "Show HN: ") {
+                                    newLocalizableItem.isShowHNStory = true
+                                    newLocalizableItem.item.title = title.replacingOccurrences(of: "Show HN: ", with: "")
+                                    newLocalizableItem.titleLocalized = try await translator
+                                        .translate(title.replacingOccurrences(of: "Show HN: ", with: ""))
                                 } else {
-                                    newLocalizableItem.textLocalized = try await translator
-                                        .translate(storyItem.text ?? "")
+                                    newLocalizableItem.titleLocalized = try await translator
+                                        .translate(title)
                                 }
-                                debugPrint("[\(storyID)] Setting cache date...")
-                                newLocalizableItem.cacheDate = Date()
-                                await miniCache.cache(newItem: newLocalizableItem)
-                                return newLocalizableItem
-                            } catch {
-                                return nil
                             }
+                            debugPrint("[\(storyID)] Localizing text...")
+                            if let textDeformatted = newLocalizableItem.textDeformatted() {
+                                newLocalizableItem.textLocalized = try await translator
+                                    .translate(textDeformatted)
+                            } else {
+                                newLocalizableItem.textLocalized = try await translator
+                                    .translate(storyItem.text ?? "")
+                            }
+                            debugPrint("[\(storyID)] Setting cache date...")
+                            newLocalizableItem.cacheDate = Date()
+                            await miniCache.cache(newItem: newLocalizableItem)
+                            return newLocalizableItem
+                        } catch {
+                            return nil
                         }
                     }
                 }
-                for await result in group {
-                    if let result = result {
-                        stories.append(result)
-                    }
-                }
-                return stories
-            })
-            switch type {
-            case .top, .new, .best:
-                stories.feed = fetchedStories
-            case .show:
-                stories.showStories = fetchedStories
-            case .job:
-                stories.jobs = fetchedStories
             }
-        } catch {
-            errorText = error.localizedDescription
+            for await result in group {
+                if let result = result {
+                    stories.append(result)
+                }
+            }
+            return stories
+        })
+        switch type {
+        case .top, .new, .best:
+            stories.feed = fetchedStories
+        case .show:
+            stories.showStories = fetchedStories
+        case .job:
+            stories.jobs = fetchedStories
         }
+        overlayText = ""
     }
-    
+
+    func downloadTranslationModel() async throws {
+        overlayMode = .progress
+        overlayText = "翻訳用リソースをダウンロード中…"
+        try await translator.downloadModelIfNeeded()
+        overlayText = ""
+    }
+
     @ViewBuilder
     func storyList() -> some View {
         switch type {
@@ -253,5 +269,10 @@ struct StoriesView: View {
                 }
             })
         }
+    }
+
+    enum OverlayMode {
+        case progress
+        case error
     }
 }

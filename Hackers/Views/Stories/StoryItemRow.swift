@@ -56,13 +56,19 @@ struct StoryItemRow: View {
             .task {
                 if state == .initialized {
                     state = .loadingInitialData
-                    if let storedFavicon = story.favicon() {
+                    if story.faviconData == nil && story.faviconWasNotFoundOnLastFetch {
+                        debugPrint("[\(story.item.id)] Using null favicon...")
+                    } else if let storedFavicon = story.favicon() {
                         debugPrint("[\(story.item.id)] Getting favicon from cache...")
                         favicon = storedFavicon
                     } else {
                         debugPrint("[\(story.item.id)] Getting favicon from Internet...")
                         if let fetchedFaviconData = await story.downloadFavicon() {
                             favicon = UIImage(data: fetchedFaviconData)
+                            story.faviconData = fetchedFaviconData
+                            miniCache.cache(newItem: story)
+                        } else {
+                            story.faviconWasNotFoundOnLastFetch = true
                             miniCache.cache(newItem: story)
                         }
                     }
