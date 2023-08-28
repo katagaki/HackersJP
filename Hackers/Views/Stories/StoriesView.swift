@@ -102,7 +102,7 @@ struct StoriesView: View {
                                 overlayTotal: $overlayTotal)
                     }
                 }
-                .animation(.snappy, value: isOverlayShowing)
+                .animation(.default, value: isOverlayShowing)
             }
             .sheet(item: $selectedStory, onDismiss: {
                 selectedStory = nil
