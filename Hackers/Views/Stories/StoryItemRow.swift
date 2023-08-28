@@ -32,6 +32,9 @@ struct StoryItemRow: View {
                                 .fixedSize()
                                 .clipShape(RoundedRectangle(cornerRadius: 2.0))
                                 .transition(.opacity)
+                                .task {
+                                    miniCache.cache(newItem: story)
+                                }
                         } else {
                             Image(systemName: "globe")
                                 .resizable()
@@ -65,13 +68,6 @@ struct StoryItemRow: View {
                     imageState = .readyForPresentation
                 }
             }
-            .onChange(of: imageState, perform: { value in
-                if value == .initalDataLoaded {
-                    Task {
-                        miniCache.cache(newItem: story)
-                    }
-                }
-            })
         }
     }
 }
