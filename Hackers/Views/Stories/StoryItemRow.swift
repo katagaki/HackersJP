@@ -58,11 +58,17 @@ struct StoryItemRow: View {
                     imageState = .loadingInitialData
                     if let faviconData = await story.downloadFavicon() {
                         story.faviconData = faviconData
-//                        miniCache.cache(newItem: story)
                     }
                     imageState = .readyForPresentation
                 }
             }
+            .onChange(of: imageState, perform: { value in
+                if value == .readyForPresentation {
+                    Task {
+                        miniCache.cache(newItem: story)
+                    }
+                }
+            })
         }
     }
 }
