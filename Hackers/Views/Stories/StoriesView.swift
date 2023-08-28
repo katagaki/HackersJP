@@ -11,6 +11,7 @@ import SwiftUI
 
 struct StoriesView: View {
 
+    @EnvironmentObject var stories: StoryManager
     @EnvironmentObject var miniCache: CacheManager
     @EnvironmentObject var settings: SettingsManager
 
@@ -20,7 +21,6 @@ struct StoriesView: View {
     
     @State var state: ViewState = .initialized
     @State var type: HNStoryType
-    @State var stories: [HNItemLocalizable] = []
     @State var selectedStory: HNItemLocalizable? = nil
     @State var progressText: String = "準備中…"
     @State var errorText: String = ""
@@ -29,33 +29,7 @@ struct StoriesView: View {
 
     var body: some View {
         NavigationStack {
-            List(stories, id: \.item.id, rowContent: { story in
-                if type == .job {
-                    if story.item.url != nil {
-                        Button {
-                            selectedStory = story
-                        } label: {
-                            HStack {
-                                StoryItemRow(story: story)
-                                Spacer()
-                            }
-                        }
-                        .contentShape(Rectangle())
-                    } else {
-                        NavigationLink {
-                            StoryView(story: story)
-                        } label: {
-                            StoryItemRow(story: story)
-                        }
-                    }
-                } else {
-                    NavigationLink {
-                        StoryView(story: story)
-                    } label: {
-                        StoryItemRow(story: story)
-                    }
-                }
-            })
+            storyList()
             .task {
                 if state == .initialized {
                     do {
@@ -83,32 +57,20 @@ struct StoriesView: View {
                 }
             }
             .safeAreaInset(edge: .bottom, alignment: .center) {
-                HStack(alignment: .center, spacing: 2) {
-                    Button {
-                        Task {
-                            currentPage -= 1
-                            await refreshStoriesWithProgress()
-                        }
-                    } label: {
-                        Image(systemName: "arrowtriangle.left.fill")
+                Paginator(currentPage: $currentPage, 
+                          totalPages: .constant((Int(ceil(Double(storyCount) /
+                                                          Double(settings.pageStoryCount)))))) {
+                    Task {
+                        currentPage -= 1
+                        await refreshStoriesWithProgress()
                     }
-                    .padding(.leading)
-                    .disabled(!(progressText == "") || currentPage == 0)
-                    Spacer()
-                    Text("ページ \(currentPage + 1) / \(Int(ceil(Double(storyCount) / Double(settings.pageStoryCount))))")
-                        .padding()
-                    Spacer()
-                    Button {
-                        Task {
-                            currentPage += 1
-                            await refreshStoriesWithProgress()
-                        }
-                    } label: {
-                        Image(systemName: "arrowtriangle.right.fill")
+                } nextAction: {
+                    Task {
+                        currentPage += 1
+                        await refreshStoriesWithProgress()
                     }
-                    .padding(.trailing)
-                    .disabled(!(progressText == "") || currentPage + 1 >= Int(ceil(Double(storyCount) / Double(settings.pageStoryCount))))
                 }
+                .disabled(progressText != "")
                 .background(.regularMaterial,
                             in: RoundedRectangle(cornerRadius: 99, style: .continuous))
                 .padding()
@@ -161,7 +123,14 @@ struct StoriesView: View {
     }
 
     func refreshStoriesWithProgress() async {
-        stories.removeAll()
+        switch type {
+        case .top, .new, .best:
+            stories.feed.removeAll()
+        case .show:
+            stories.showStories.removeAll()
+        case .job:
+            stories.jobs.removeAll()
+        }
         progressText = "記事を読み込み中…"
         await refreshStories()
         progressText = ""
@@ -175,7 +144,7 @@ struct StoriesView: View {
                 .serializingDecodable([Int].self,
                                       decoder: JSONDecoder()).value
             storyCount = storyIDs.count
-            stories = await withTaskGroup(of: HNItemLocalizable?.self,
+            let fetchedStories = await withTaskGroup(of: HNItemLocalizable?.self,
                                           returning: [HNItemLocalizable].self, body: { group in
                 var stories: [HNItemLocalizable] = []
                 let currentStartingIndex = currentPage * settings.pageStoryCount
@@ -211,7 +180,6 @@ struct StoriesView: View {
                                     .translate(storyItem.text ?? "")
                             }
                             newLocalizableItem.cacheDate = Date()
-                            await miniCache.cache(newItem: newLocalizableItem)
                             return newLocalizableItem
                         } catch {
                             return nil
@@ -225,8 +193,67 @@ struct StoriesView: View {
                 }
                 return stories
             })
+            switch type {
+            case .top, .new, .best:
+                stories.feed = fetchedStories
+                for story in stories.feed {
+                    miniCache.cache(newItem: story)
+                }
+            case .show:
+                stories.showStories = fetchedStories
+                for story in stories.showStories {
+                    miniCache.cache(newItem: story)
+                }
+            case .job:
+                stories.jobs = fetchedStories
+                for story in stories.jobs {
+                    miniCache.cache(newItem: story)
+                }
+            }
         } catch {
             errorText = error.localizedDescription
+        }
+    }
+    
+    @ViewBuilder
+    func storyList() -> some View {
+        switch type {
+        case .job:
+            List($stories.jobs, id: \.item.id, rowContent: { $story in
+                if story.item.url != nil {
+                    Button {
+                        selectedStory = story
+                    } label: {
+                        HStack {
+                            StoryItemRow(story: $story)
+                            Spacer()
+                        }
+                    }
+                    .contentShape(Rectangle())
+                } else {
+                    NavigationLink {
+                        StoryView(story: story)
+                    } label: {
+                        StoryItemRow(story: $story)
+                    }
+                }
+            })
+        case .show:
+            List($stories.showStories, id: \.item.id, rowContent: { $story in
+                NavigationLink {
+                    StoryView(story: story)
+                } label: {
+                    StoryItemRow(story: $story)
+                }
+            })
+        default:
+            List($stories.feed, id: \.item.id, rowContent: { $story in
+                NavigationLink {
+                    StoryView(story: story)
+                } label: {
+                    StoryItemRow(story: $story)
+                }
+            })
         }
     }
 }

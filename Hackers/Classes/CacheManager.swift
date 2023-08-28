@@ -12,7 +12,7 @@ class CacheManager: ObservableObject {
     let defaults = UserDefaults.standard
     let encoder = JSONEncoder()
     let decoder = JSONDecoder()
-    var items: [Int: HNItemLocalizable] = [:]
+    @Published var items: [Int: HNItemLocalizable] = [:]
 
     init() {
         if defaults.value(forKey: "MiniCache") == nil {
@@ -46,9 +46,6 @@ class CacheManager: ObservableObject {
     }
 
     func cache(newItem: HNItemLocalizable) {
-        if items[newItem.item.id] != nil {
-            items.removeValue(forKey: newItem.item.id)
-        }
         items[newItem.item.id] = newItem
         save()
     }

@@ -59,7 +59,8 @@ struct StoryView: View {
                         Button {
                             isSafariViewControllerPresenting = true
                         } label: {
-                            if let favicon = story.favicon() {
+                            if story.faviconData != nil,
+                               let favicon = story.favicon() {
                                 Image(uiImage: favicon)
                                     .resizable()
                                     .frame(width: 20, height: 20)
@@ -163,7 +164,6 @@ struct StoryView: View {
                                 .translate(commentItem.text ?? "")
                         }
                         newLocalizableItem.cacheDate = Date()
-                        await miniCache.cache(newItem: newLocalizableItem)
                         return newLocalizableItem
                     } catch {
                         return nil
@@ -177,5 +177,8 @@ struct StoryView: View {
             }
             return comments
         })
+        for comment in comments {
+            miniCache.cache(newItem: comment)
+        }
     }
 }

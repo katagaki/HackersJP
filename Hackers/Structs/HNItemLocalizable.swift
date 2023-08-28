@@ -10,7 +10,7 @@ import Foundation
 import SwiftSoup
 import UIKit
 
-struct HNItemLocalizable: Identifiable, Codable {
+struct HNItemLocalizable: Identifiable, Equatable, Codable {
 
     var id: Int {
         get {
@@ -25,6 +25,10 @@ struct HNItemLocalizable: Identifiable, Codable {
     var isShowHNStory: Bool = false
     var faviconData: Data? = nil
     var cacheDate: Date? = nil
+
+    static func == (lhs: HNItemLocalizable, rhs: HNItemLocalizable) -> Bool {
+        lhs.id == rhs.id && lhs.faviconData == rhs.faviconData
+    }
 
     func urlTranslated() -> String {
         if let itemURL = item.url,

@@ -13,8 +13,8 @@ struct StoryItemRow: View {
     @EnvironmentObject var miniCache: CacheManager
     @EnvironmentObject var settings: SettingsManager
 
-    @State var story: HNItemLocalizable
-    @State var imageState: ViewState = .initialized
+    @Binding var story: HNItemLocalizable
+    @State var state: ViewState = .initialized
 
     var body: some View {
         if story.item.id != -1 {
@@ -25,16 +25,13 @@ struct StoryItemRow: View {
                     .layoutPriority(1)
                 HStack(alignment: .center, spacing: 4.0) {
                     if let hostname = story.hostname() {
-                        if let favicon = story.favicon() {
+                        if story.faviconData != nil,
+                           let favicon = story.favicon() {
                             Image(uiImage: favicon)
                                 .resizable()
                                 .frame(width: 12, height: 12)
                                 .fixedSize()
                                 .clipShape(RoundedRectangle(cornerRadius: 2.0))
-                                .transition(.opacity)
-                                .task {
-                                    miniCache.cache(newItem: story)
-                                }
                         } else {
                             Image(systemName: "globe")
                                 .resizable()
@@ -57,17 +54,19 @@ struct StoryItemRow: View {
                 .fixedSize(horizontal: false, vertical: true)
             }
             .task {
-                if imageState == .initialized {
-                    imageState = .loadingInitialData
+                if state == .initialized {
+                    state = .loadingInitialData
                     if story.faviconData == nil {
                         if let faviconData = await story.downloadFavicon() {
                             story.faviconData = faviconData
-                            imageState = .initalDataLoaded
                         }
                     }
-                    imageState = .readyForPresentation
+                    state = .readyForPresentation
                 }
             }
+            .onChange(of: story, perform: { _ in
+                miniCache.cache(newItem: story)
+            })
         }
     }
 }
