@@ -56,16 +56,17 @@ struct StoryItemRow: View {
             .task {
                 if imageState == .initialized {
                     imageState = .loadingInitialData
-                    if story.faviconData != nil {
+                    if story.faviconData == nil {
                         if let faviconData = await story.downloadFavicon() {
                             story.faviconData = faviconData
+                            imageState = .initalDataLoaded
                         }
                     }
                     imageState = .readyForPresentation
                 }
             }
             .onChange(of: imageState, perform: { value in
-                if value == .readyForPresentation {
+                if value == .initalDataLoaded {
                     Task {
                         miniCache.cache(newItem: story)
                     }

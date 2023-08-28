@@ -10,6 +10,7 @@ import Foundation
 enum ViewState {
     case initialized
     case loadingInitialData
+    case initalDataLoaded
     case readyForInteraction
     case readyForPresentation
     case resetting
