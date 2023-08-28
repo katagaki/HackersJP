@@ -26,6 +26,8 @@ struct StoriesView: View {
     @State var isOverlayShowing: Bool = false
     @State var overlayMode: OverlayMode = .progress
     @State var overlayText: String = "準備中…"
+    @State var overlayCurrent: Int = 0
+    @State var overlayTotal: Int = 0
     @State var currentPage: Int = 0
 
     var body: some View {
@@ -95,18 +97,27 @@ struct StoriesView: View {
                         VStack(alignment: .center, spacing: 8) {
                             switch overlayMode {
                             case .progress:
-                                ProgressView()
-                                    .progressViewStyle(.circular)
+                                ProgressView(value: Double(overlayCurrent),
+                                             total: Double(overlayTotal))
+                                .progressViewStyle(.linear)
+                                .frame(width: 200.0)
                             case .error:
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .symbolRenderingMode(.multicolor)
                                     .font(.largeTitle)
                             }
                             Text(overlayText)
+                                .font(.body)
+                            if overlayMode == .progress {
+                                Text("\(overlayCurrent) / \(overlayTotal)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                         .padding()
                         .background(.regularMaterial)
                         .clipShape(RoundedRectangle(cornerRadius: 8.0))
+                        .padding()
                     }
                 }
                 .animation(.snappy, value: isOverlayShowing)
@@ -159,11 +170,15 @@ struct StoriesView: View {
                                       returning: [HNItemLocalizable].self, body: { group in
             var stories: [HNItemLocalizable] = []
             let currentStartingIndex = currentPage * settings.pageStoryCount
+            overlayTotal = settings.pageStoryCount
             for storyID in storyIDs[currentStartingIndex..<min(storyIDs.count, currentStartingIndex + settings.pageStoryCount)] {
                 group.addTask {
                     if useCache,
                        let cachedStory = await miniCache.item(for: storyID) {
                         debugPrint("[\(storyID)] Using cache...")
+                        DispatchQueue.main.async {
+                            overlayCurrent += 1
+                        }
                         return cachedStory
                     } else {
                         do {
@@ -197,6 +212,9 @@ struct StoriesView: View {
                             debugPrint("[\(storyID)] Setting cache date...")
                             newLocalizableItem.cacheDate = Date()
                             await miniCache.cache(newItem: newLocalizableItem)
+                            DispatchQueue.main.async {
+                                overlayCurrent += 1
+                            }
                             return newLocalizableItem
                         } catch {
                             return nil
@@ -211,6 +229,8 @@ struct StoriesView: View {
             }
             return stories
         })
+        overlayCurrent = 0
+        overlayTotal = 0
         switch type {
         case .top, .new, .best:
             stories.feed = fetchedStories
