@@ -102,17 +102,11 @@
 		E41D15372A95B812008B686B /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				E46652B72A9463CB0048BA05 /* App.swift */,
 				E46652B92A9463CB0048BA05 /* MainTabView.swift */,
-				E46652CD2A9473720048BA05 /* StoriesView.swift */,
-				E41D15322A95B00C008B686B /* StoryItemRow.swift */,
-				E43C43922A9858B70011FE82 /* StoryView.swift */,
-				E43C439D2A9878960011FE82 /* CommentItemRow.swift */,
-				E477E7212A95D7FD00517B72 /* SafariView.swift */,
-				E477E7292A95F90700517B72 /* MoreView.swift */,
-				E43C439B2A9872DC0011FE82 /* CacheView.swift */,
-				E46652CB2A94690B0048BA05 /* LicensesView.swift */,
-				E477E72D2A95F9BE00517B72 /* ListSectionHeader.swift */,
-				E477E72B2A95F94600517B72 /* ListRow.swift */,
+				E4EB91D22A9C879600C0C93C /* Stories */,
+				E4EB91D32A9C87AC00C0C93C /* More */,
+				E4EB91D42A9C87BC00C0C93C /* Shared */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -150,7 +144,6 @@
 				E46652BB2A9463CE0048BA05 /* Assets.xcassets */,
 				E48A02772A9A0DCA00C31F40 /* LaunchScreen.storyboard */,
 				E46652BD2A9463CE0048BA05 /* Hackers.entitlements */,
-				E46652B72A9463CB0048BA05 /* App.swift */,
 				E43C43962A9861A00011FE82 /* API */,
 				E47FC65A2A97BB3A006BBCF9 /* Classes */,
 				E41D15362A95B804008B686B /* Structs */,
@@ -185,6 +178,37 @@
 				E47FC65D2A97BBB1006BBCF9 /* SettingsManager.swift */,
 			);
 			path = Classes;
+			sourceTree = "<group>";
+		};
+		E4EB91D22A9C879600C0C93C /* Stories */ = {
+			isa = PBXGroup;
+			children = (
+				E46652CD2A9473720048BA05 /* StoriesView.swift */,
+				E41D15322A95B00C008B686B /* StoryItemRow.swift */,
+				E43C43922A9858B70011FE82 /* StoryView.swift */,
+				E43C439D2A9878960011FE82 /* CommentItemRow.swift */,
+			);
+			path = Stories;
+			sourceTree = "<group>";
+		};
+		E4EB91D32A9C87AC00C0C93C /* More */ = {
+			isa = PBXGroup;
+			children = (
+				E477E7292A95F90700517B72 /* MoreView.swift */,
+				E43C439B2A9872DC0011FE82 /* CacheView.swift */,
+				E46652CB2A94690B0048BA05 /* LicensesView.swift */,
+			);
+			path = More;
+			sourceTree = "<group>";
+		};
+		E4EB91D42A9C87BC00C0C93C /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				E477E7212A95D7FD00517B72 /* SafariView.swift */,
+				E477E72D2A95F9BE00517B72 /* ListSectionHeader.swift */,
+				E477E72B2A95F94600517B72 /* ListRow.swift */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

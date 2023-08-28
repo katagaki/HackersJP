@@ -37,16 +37,6 @@ struct StoryItemRow: View {
                                 .resizable()
                                 .frame(width: 12, height: 12)
                                 .fixedSize()
-                                .task {
-                                    if imageState == .initialized {
-                                        imageState = .loadingInitialData
-                                        if let faviconData = await story.downloadFavicon() {
-                                            story.faviconData = faviconData
-                                            miniCache.cache(newItem: story)
-                                        }
-                                        imageState = .readyForPresentation
-                                    }
-                                }
                         }
                         Text(hostname)
                         Divider()
@@ -62,6 +52,16 @@ struct StoryItemRow: View {
                 .lineLimit(1)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
+            }
+            .task {
+                if imageState == .initialized {
+                    imageState = .loadingInitialData
+                    if let faviconData = await story.downloadFavicon() {
+                        story.faviconData = faviconData
+//                        miniCache.cache(newItem: story)
+                    }
+                    imageState = .readyForPresentation
+                }
             }
         }
     }

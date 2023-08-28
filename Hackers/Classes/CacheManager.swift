@@ -12,7 +12,7 @@ class CacheManager: ObservableObject {
     let defaults = UserDefaults.standard
     let encoder = JSONEncoder()
     let decoder = JSONDecoder()
-    @Published var items: [Int: HNItemLocalizable] = [:]
+    var items: [Int: HNItemLocalizable] = [:]
 
     init() {
         if defaults.value(forKey: "MiniCache") == nil {
