@@ -195,20 +195,20 @@ struct StoriesView: View {
             })
             switch type {
             case .top, .new, .best:
-                stories.feed = fetchedStories
                 for story in stories.feed {
                     miniCache.cache(newItem: story)
                 }
+                stories.feed = fetchedStories
             case .show:
-                stories.showStories = fetchedStories
                 for story in stories.showStories {
                     miniCache.cache(newItem: story)
                 }
+                stories.showStories = fetchedStories
             case .job:
-                stories.jobs = fetchedStories
                 for story in stories.jobs {
                     miniCache.cache(newItem: story)
                 }
+                stories.jobs = fetchedStories
             }
         } catch {
             errorText = error.localizedDescription
