@@ -15,6 +15,7 @@ struct StoryItemRow: View {
 
     @Binding var story: HNItemLocalizable
     @State var state: ViewState = .initialized
+    @State var favicon: UIImage? = nil
 
     var body: some View {
         if story.item.id != -1 {
@@ -25,8 +26,7 @@ struct StoryItemRow: View {
                     .layoutPriority(1)
                 HStack(alignment: .center, spacing: 4.0) {
                     if let hostname = story.hostname() {
-                        if story.faviconData != nil,
-                           let favicon = story.favicon() {
+                       if let favicon = favicon {
                             Image(uiImage: favicon)
                                 .resizable()
                                 .frame(width: 12, height: 12)
@@ -56,17 +56,19 @@ struct StoryItemRow: View {
             .task {
                 if state == .initialized {
                     state = .loadingInitialData
-                    if story.faviconData == nil {
-                        if let faviconData = await story.downloadFavicon() {
-                            story.faviconData = faviconData
+                    if let storedFavicon = story.favicon() {
+                        debugPrint("[\(story.item.id)] Getting favicon from cache...")
+                        favicon = storedFavicon
+                    } else {
+                        debugPrint("[\(story.item.id)] Getting favicon from Internet...")
+                        if let fetchedFaviconData = await story.downloadFavicon() {
+                            favicon = UIImage(data: fetchedFaviconData)
+                            miniCache.cache(newItem: story)
                         }
                     }
                     state = .readyForPresentation
                 }
             }
-            .onChange(of: story, perform: { _ in
-                miniCache.cache(newItem: story)
-            })
         }
     }
 }

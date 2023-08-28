@@ -150,39 +150,46 @@ struct StoriesView: View {
                 let currentStartingIndex = currentPage * settings.pageStoryCount
                 for storyID in storyIDs[currentStartingIndex..<min(storyIDs.count, currentStartingIndex + settings.pageStoryCount)] {
                     group.addTask {
-                        if useCache {
-                            if let cachedStory = await miniCache.item(for: storyID) {
-                                return cachedStory
-                            }
-                        }
-                        do {
-                            let storyItem = try await AF.request("\(apiEndpoint)/item/\(storyID).json",
-                                                                 method: .get)
-                                .serializingDecodable(HNItem.self,
-                                                      decoder: JSONDecoder()).value
-                            var newLocalizableItem = HNItemLocalizable(item: storyItem)
-                            if let title = newLocalizableItem.item.title {
-                                if title.starts(with: "Show HN: ") {
-                                    newLocalizableItem.isShowHNStory = true
-                                    newLocalizableItem.item.title = title.replacingOccurrences(of: "Show HN: ", with: "")
-                                    newLocalizableItem.titleLocalized = try await translator
-                                        .translate(title.replacingOccurrences(of: "Show HN: ", with: ""))
-                                } else {
-                                    newLocalizableItem.titleLocalized = try await translator
-                                        .translate(title)
+                        if useCache,
+                           let cachedStory = await miniCache.item(for: storyID) {
+                            debugPrint("[\(storyID)] Using cache...")
+                            return cachedStory
+                        } else {
+                            do {
+                                debugPrint("[\(storyID)] Fetching story...")
+                                let storyItem = try await AF.request("\(apiEndpoint)/item/\(storyID).json",
+                                                                     method: .get)
+                                    .serializingDecodable(HNItem.self,
+                                                          decoder: JSONDecoder()).value
+                                debugPrint("[\(storyID)] Creating localizable object...")
+                                var newLocalizableItem = HNItemLocalizable(item: storyItem)
+                                debugPrint("[\(storyID)] Localizing title...")
+                                if let title = newLocalizableItem.item.title {
+                                    if title.starts(with: "Show HN: ") {
+                                        newLocalizableItem.isShowHNStory = true
+                                        newLocalizableItem.item.title = title.replacingOccurrences(of: "Show HN: ", with: "")
+                                        newLocalizableItem.titleLocalized = try await translator
+                                            .translate(title.replacingOccurrences(of: "Show HN: ", with: ""))
+                                    } else {
+                                        newLocalizableItem.titleLocalized = try await translator
+                                            .translate(title)
+                                    }
                                 }
+                                debugPrint("[\(storyID)] Localizing text...")
+                                if let textDeformatted = newLocalizableItem.textDeformatted() {
+                                    newLocalizableItem.textLocalized = try await translator
+                                        .translate(textDeformatted)
+                                } else {
+                                    newLocalizableItem.textLocalized = try await translator
+                                        .translate(storyItem.text ?? "")
+                                }
+                                debugPrint("[\(storyID)] Setting cache date...")
+                                newLocalizableItem.cacheDate = Date()
+                                await miniCache.cache(newItem: newLocalizableItem)
+                                return newLocalizableItem
+                            } catch {
+                                return nil
                             }
-                            if let textDeformatted = newLocalizableItem.textDeformatted() {
-                                newLocalizableItem.textLocalized = try await translator
-                                    .translate(textDeformatted)
-                            } else {
-                                newLocalizableItem.textLocalized = try await translator
-                                    .translate(storyItem.text ?? "")
-                            }
-                            newLocalizableItem.cacheDate = Date()
-                            return newLocalizableItem
-                        } catch {
-                            return nil
                         }
                     }
                 }
@@ -195,19 +202,10 @@ struct StoriesView: View {
             })
             switch type {
             case .top, .new, .best:
-                for story in stories.feed {
-                    miniCache.cache(newItem: story)
-                }
                 stories.feed = fetchedStories
             case .show:
-                for story in stories.showStories {
-                    miniCache.cache(newItem: story)
-                }
                 stories.showStories = fetchedStories
             case .job:
-                for story in stories.jobs {
-                    miniCache.cache(newItem: story)
-                }
                 stories.jobs = fetchedStories
             }
         } catch {

@@ -9,7 +9,7 @@ import SwiftUI
 
 @main
 struct HackersApp: App {
-    
+
     @StateObject var stories = StoryManager()
     @StateObject var miniCache = CacheManager()
     @StateObject var settings = SettingsManager()
