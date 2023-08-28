@@ -56,8 +56,10 @@ struct StoryItemRow: View {
             .task {
                 if imageState == .initialized {
                     imageState = .loadingInitialData
-                    if let faviconData = await story.downloadFavicon() {
-                        story.faviconData = faviconData
+                    if story.faviconData != nil {
+                        if let faviconData = await story.downloadFavicon() {
+                            story.faviconData = faviconData
+                        }
                     }
                     imageState = .readyForPresentation
                 }
