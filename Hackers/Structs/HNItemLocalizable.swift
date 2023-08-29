@@ -25,6 +25,7 @@ struct HNItemLocalizable: Identifiable, Equatable, Codable {
     var isShowHNStory: Bool = false
     var faviconData: Data? = nil
     var faviconWasNotFoundOnLastFetch: Bool = false
+    var requiresCaching: Bool = false
     var cacheDate: Date? = nil
 
     static func == (lhs: HNItemLocalizable, rhs: HNItemLocalizable) -> Bool {
@@ -75,6 +76,7 @@ struct HNItemLocalizable: Identifiable, Equatable, Codable {
                 return downloadedFavicon.image.pngData()
             } catch {
                 debugPrint(error.localizedDescription)
+                return nil
             }
         }
         return nil

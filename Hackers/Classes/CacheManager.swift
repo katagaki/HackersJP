@@ -44,6 +44,16 @@ class CacheManager: ObservableObject {
         items.removeAll()
         save()
     }
+    
+    func cache(newItems: [HNItemLocalizable]) {
+        for newItem in newItems {
+            debugPrint("[\(newItem.item.id)] Caching...")
+            DispatchQueue.main.async { [self] in
+                items[newItem.item.id] = newItem
+            }
+        }
+        save()
+    }
 
     func cache(newItem: HNItemLocalizable) {
         debugPrint("[\(newItem.item.id)] Caching...")

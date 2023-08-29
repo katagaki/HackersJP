@@ -50,15 +50,22 @@ struct StoriesView: View {
                     }
                 }
             }
+            .onDisappear {
+                cacheStories()
+            }
             .refreshable {
-                do {
-                    try await refreshStoryIDs()
-                    await refreshStories(useCache: false)
-                    currentPage = 0
-                } catch {
-                    overlayMode = .error
-                    overlayText = error.localizedDescription
-                    state = .initialized
+                if state == .readyForInteraction {
+                    do {
+                        state = .loadingInitialData
+                        try await refreshStoryIDs()
+                        await refreshStories(useCache: false)
+                        currentPage = 0
+                        state = .readyForInteraction
+                    } catch {
+                        overlayMode = .error
+                        overlayText = error.localizedDescription
+                        state = .initialized
+                    }
                 }
             }
             .toolbar {
@@ -73,16 +80,16 @@ struct StoriesView: View {
                           totalPages: .constant((Int(ceil(Double(storyIDs.count) /
                                                           Double(settings.pageStoryCount)))))) {
                     Task {
-                        currentPage -= 1
                         isOverlayShowing = true
+                        currentPage -= 1
                         cacheStories()
                         await refreshStories()
                         isOverlayShowing = false
                     }
                 } nextAction: {
                     Task {
-                        currentPage += 1
                         isOverlayShowing = true
+                        currentPage += 1
                         cacheStories()
                         await refreshStories()
                         isOverlayShowing = false
@@ -117,17 +124,21 @@ struct StoriesView: View {
             })
             .onChange(of: settings.feedSort, perform: { _ in
                 Task {
+                    isOverlayShowing = true
                     currentPage = 0
                     if type == .top || type == .new || type == .best {
                         type = settings.feedSort
                         await refreshStories()
                     }
+                    isOverlayShowing = false
                 }
             })
             .onChange(of: settings.pageStoryCount, perform: { _ in
                 Task {
+                    isOverlayShowing = true
                     currentPage = 0
                     await refreshStories()
+                    isOverlayShowing = false
                 }
             })
             .listStyle(.plain)
@@ -138,16 +149,22 @@ struct StoriesView: View {
     func refreshStoryIDs() async throws {
         overlayMode = .progress
         overlayText = "記事を読み込み中…"
+        overlayCurrent = 0
+        overlayTotal = 1
         let jsonURL = "\(apiEndpoint)/\(type.getConfig().jsonName).json"
         storyIDs = try await AF.request(jsonURL, method: .get)
             .serializingDecodable([Int].self,
                                   decoder: JSONDecoder()).value
+        overlayCurrent = 1
+        overlayTotal = 1
         overlayText = ""
     }
 
     func refreshStories(useCache: Bool = true) async {
         overlayMode = .progress
         overlayText = "記事内容を読み込み中…"
+        overlayCurrent = 0
+        overlayTotal = 0
         let fetchedStories = await withTaskGroup(of: HNItemLocalizable?.self,
                                       returning: [HNItemLocalizable].self, body: { group in
             var stories: [HNItemLocalizable] = []
@@ -156,8 +173,9 @@ struct StoriesView: View {
             for storyID in storyIDs[currentStartingIndex..<min(storyIDs.count, currentStartingIndex + settings.pageStoryCount)] {
                 group.addTask(priority: .high) {
                     if useCache,
-                       let cachedStory = await miniCache.item(for: storyID) {
+                       var cachedStory = await miniCache.item(for: storyID) {
                         debugPrint("[\(storyID)] Using cache...")
+                        cachedStory.requiresCaching = false
                         DispatchQueue.main.async {
                             overlayCurrent += 1
                         }
@@ -167,6 +185,7 @@ struct StoriesView: View {
                             debugPrint("[\(storyID)] Fetching story...")
                             var newLocalizableItem = try await fetchStory(storyID: storyID)
                             debugPrint("[\(storyID)] Setting cache date...")
+                            newLocalizableItem.requiresCaching = true
                             newLocalizableItem.cacheDate = Date()
                             DispatchQueue.main.async {
                                 overlayCurrent += 1
@@ -232,20 +251,25 @@ struct StoriesView: View {
     func downloadTranslationModel() async throws {
         overlayMode = .progress
         overlayText = "翻訳用リソースをダウンロード中…"
+        overlayCurrent = 0
+        overlayTotal = 1
         try await translator.downloadModelIfNeeded()
+        overlayCurrent = 1
+        overlayTotal = 1
         overlayText = ""
     }
 
     func cacheStories() {
-        for story in stories.feed {
-            miniCache.cache(newItem: story)
-        }
-        for story in stories.jobs {
-            miniCache.cache(newItem: story)
-        }
-        for story in stories.showStories {
-            miniCache.cache(newItem: story)
-        }
+        miniCache.cache(newItems: stories.feed.filter { story in
+            story.requiresCaching
+        })
+        miniCache.cache(newItems: stories.jobs.filter { story in
+            story.requiresCaching
+        })
+        miniCache.cache(newItems: stories.showStories.filter { story in
+            story.requiresCaching
+        })
+        stories.setRequiresCachingToFalseForAll()
     }
 
     @ViewBuilder
