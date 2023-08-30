@@ -27,16 +27,16 @@ class NavigationManager: ObservableObject {
         }
     }
 
-    func push(_ component: AnyObject, for tab: TabType) {
+    func push(_ viewPath: AnyObject, for tab: TabType) {
         switch tab {
         case .feed:
-            feedTabPath.append(component as! HNItemLocalizable)
+            feedTabPath.append(viewPath as! HNItemLocalizable)
         case .jobs:
-            jobsTabPath.append(component as! HNItemLocalizable)
+            jobsTabPath.append(viewPath as! HNItemLocalizable)
         case .show:
-            showTabPath.append(component as! HNItemLocalizable)
+            showTabPath.append(viewPath as! HNItemLocalizable)
         case .more:
-            moreTabPath.append(component as! ViewPath)
+            moreTabPath.append(viewPath as! ViewPath)
         }
     }
 
