@@ -10,7 +10,7 @@ import Foundation
 import SwiftSoup
 import UIKit
 
-struct HNItemLocalizable: Identifiable, Equatable, Codable {
+struct HNItemLocalizable: Identifiable, Equatable, Hashable, Codable {
 
     var id: Int {
         get {
@@ -30,6 +30,10 @@ struct HNItemLocalizable: Identifiable, Equatable, Codable {
 
     static func == (lhs: HNItemLocalizable, rhs: HNItemLocalizable) -> Bool {
         lhs.id == rhs.id && lhs.faviconData == rhs.faviconData
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 
     func urlTranslated() -> String {

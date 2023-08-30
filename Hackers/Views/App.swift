@@ -10,6 +10,8 @@ import SwiftUI
 @main
 struct HackersApp: App {
 
+    @StateObject var tabManager = TabManager()
+    @StateObject var navigationManager = NavigationManager()
     @StateObject var stories = StoryManager()
     @StateObject var miniCache = CacheManager()
     @StateObject var settings = SettingsManager()
@@ -17,6 +19,8 @@ struct HackersApp: App {
     var body: some Scene {
         WindowGroup {
             MainTabView()
+                .environmentObject(tabManager)
+                .environmentObject(navigationManager)
                 .environmentObject(stories)
                 .environmentObject(miniCache)
                 .environmentObject(settings)

@@ -9,10 +9,11 @@ import SwiftUI
 
 struct MoreView: View {
 
+    @EnvironmentObject var navigationManager: NavigationManager
     @EnvironmentObject var settings: SettingsManager
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationManager.moreTabPath) {
             List {
                 Section {
                     Picker(selection: $settings.startupTab) {
@@ -26,13 +27,10 @@ struct MoreView: View {
                         ListRow(image: "ListIcon.Startup",
                                 title: "デフォルトタブ")
                     }
-                    NavigationLink {
-                        CacheView()
-                    } label: {
+                    NavigationLink(value: ViewPath.moreCache) {
                         ListRow(image: "ListIcon.Cache",
                                 title: "キャッシュ管理")
                     }
-
                 } header: {
                     ListSectionHeader(text: "一般")
                         .font(.body)
@@ -138,16 +136,20 @@ struct MoreView: View {
                         .font(.body)
                 }
                 Section {
-                    NavigationLink {
-                        LicensesView()
-                    } label: {
+                    NavigationLink(value: ViewPath.moreAttributions) {
                         ListRow(image: "ListIcon.Attributions",
-                                title: "著者権表記",
-                                includeSpacer: true)
+                                title: "著者権表記")
                     }
                 }
             }
             .listStyle(.insetGrouped)
+            .navigationDestination(for: ViewPath.self, destination: { viewPath in
+                switch viewPath {
+                case .moreCache: CacheView()
+                case .moreAttributions: LicensesView()
+                default: Color.clear
+                }
+            })
             .onChange(of: settings.startupTab, perform: { value in
                 settings.setStartupTab(value)
             })

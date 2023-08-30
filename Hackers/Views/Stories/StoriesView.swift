@@ -11,6 +11,7 @@ import SwiftUI
 
 struct StoriesView: View {
 
+    @EnvironmentObject var navigationManager: NavigationManager
     @EnvironmentObject var stories: StoryManager
     @EnvironmentObject var miniCache: CacheManager
     @EnvironmentObject var settings: SettingsManager
@@ -18,7 +19,7 @@ struct StoriesView: View {
     let translator = Translator.translator(
         options: TranslatorOptions(sourceLanguage: .english,
                                    targetLanguage: .japanese))
-    
+
     @State var state: ViewState = .initialized
     @State var type: HNStoryType
     @State var storyIDs: [Int] = []
@@ -31,119 +32,65 @@ struct StoriesView: View {
     @State var currentPage: Int = 0
 
     var body: some View {
-        NavigationStack {
-            storyList()
-            .task {
-                if state == .initialized {
-                    do {
-                        state = .loadingInitialData
-                        isOverlayShowing = true
-                        try await downloadTranslationModel()
-                        try await refreshStoryIDs()
-                        await refreshStories()
-                        isOverlayShowing = false
-                        state = .readyForInteraction
-                    } catch {
-                        overlayMode = .error
-                        overlayText = error.localizedDescription
-                        state = .initialized
-                    }
-                }
-            }
-            .onDisappear {
-                cacheStories()
-            }
-            .refreshable {
-                if state == .readyForInteraction {
-                    do {
-                        state = .loadingInitialData
-                        try await refreshStoryIDs()
-                        await refreshStories(useCache: false)
-                        currentPage = 0
-                        state = .readyForInteraction
-                    } catch {
-                        overlayMode = .error
-                        overlayText = error.localizedDescription
-                        state = .initialized
-                    }
-                }
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    if settings.titleLanguage == 0 {
-                        Image("TranslateBanner")
-                    }
-                }
-            }
-            .safeAreaInset(edge: .bottom, alignment: .center) {
-                Paginator(currentPage: $currentPage, 
-                          totalPages: .constant((Int(ceil(Double(storyIDs.count) /
-                                                          Double(settings.pageStoryCount)))))) {
-                    Task {
-                        isOverlayShowing = true
-                        currentPage -= 1
-                        cacheStories()
-                        await refreshStories()
-                        isOverlayShowing = false
-                    }
-                } nextAction: {
-                    Task {
-                        isOverlayShowing = true
-                        currentPage += 1
-                        cacheStories()
-                        await refreshStories()
-                        isOverlayShowing = false
-                    }
-                }
-                .disabled(isOverlayShowing)
-                .background(.regularMaterial,
-                            in: RoundedRectangle(cornerRadius: 99, style: .continuous))
-                .padding()
-            }
-            .overlay {
-                ZStack {
-                    if isOverlayShowing {
-                        Overlay(overlayMode: $overlayMode,
-                                overlayText: $overlayText,
-                                overlayCurrent: $overlayCurrent,
-                                overlayTotal: $overlayTotal)
-                    }
-                }
-                .animation(.default, value: isOverlayShowing)
-            }
-            .sheet(item: $selectedStory, onDismiss: {
-                selectedStory = nil
-            }, content: { story in
-                if settings.linkLanguage == 0 {
-                    SafariView(url: URL(string: story.urlTranslated())!)
-                        .ignoresSafeArea()
-                } else {
-                    SafariView(url: URL(string: story.item.url!)!)
-                        .ignoresSafeArea()
-                }
-            })
-            .onChange(of: settings.feedSort, perform: { _ in
-                Task {
+        navigationStack()
+        .task {
+            if state == .initialized {
+                do {
+                    state = .loadingInitialData
                     isOverlayShowing = true
-                    currentPage = 0
-                    if type == .top || type == .new || type == .best {
-                        type = settings.feedSort
-                        await refreshStories()
-                    }
-                    isOverlayShowing = false
-                }
-            })
-            .onChange(of: settings.pageStoryCount, perform: { _ in
-                Task {
-                    isOverlayShowing = true
-                    currentPage = 0
+                    try await downloadTranslationModel()
+                    try await refreshStoryIDs()
                     await refreshStories()
                     isOverlayShowing = false
+                    state = .readyForInteraction
+                } catch {
+                    overlayMode = .error
+                    overlayText = error.localizedDescription
+                    state = .initialized
                 }
-            })
-            .listStyle(.plain)
-            .navigationTitle(type.getConfig().viewTitle)
+            }
         }
+        .overlay {
+            ZStack {
+                if isOverlayShowing {
+                    Overlay(overlayMode: $overlayMode,
+                            overlayText: $overlayText,
+                            overlayCurrent: $overlayCurrent,
+                            overlayTotal: $overlayTotal)
+                }
+            }
+            .animation(.default, value: isOverlayShowing)
+        }
+        .sheet(item: $selectedStory, onDismiss: {
+            selectedStory = nil
+        }, content: { story in
+            if settings.linkLanguage == 0 {
+                SafariView(url: URL(string: story.urlTranslated())!)
+                    .ignoresSafeArea()
+            } else {
+                SafariView(url: URL(string: story.item.url!)!)
+                    .ignoresSafeArea()
+            }
+        })
+        .onChange(of: settings.feedSort, perform: { _ in
+            Task {
+                isOverlayShowing = true
+                currentPage = 0
+                if type == .top || type == .new || type == .best {
+                    type = settings.feedSort
+                    await refreshStories()
+                }
+                isOverlayShowing = false
+            }
+        })
+        .onChange(of: settings.pageStoryCount, perform: { _ in
+            Task {
+                isOverlayShowing = true
+                currentPage = 0
+                await refreshStories()
+                isOverlayShowing = false
+            }
+        })
     }
 
     func refreshStoryIDs() async throws {
@@ -271,46 +218,121 @@ struct StoriesView: View {
         })
         stories.setRequiresCachingToFalseForAll()
     }
+    
+    @ViewBuilder
+    func navigationStack() -> some View {
+        switch type {
+        case .show:
+            NavigationStack(path: $navigationManager.showTabPath) {
+                storyList()
+                    .listStyle(.plain)
+                    .navigationTitle(type.getConfig().viewTitle)
+            }
+        case .job:
+            NavigationStack(path: $navigationManager.jobsTabPath) {
+                storyList()
+                    .listStyle(.plain)
+                    .navigationTitle(type.getConfig().viewTitle)
+            }
+        default:
+            NavigationStack(path: $navigationManager.feedTabPath) {
+                storyList()
+                    .listStyle(.plain)
+                    .navigationTitle(type.getConfig().viewTitle)
+            }
+        }
+    }
 
     @ViewBuilder
     func storyList() -> some View {
-        switch type {
-        case .job:
-            List($stories.jobs, id: \.item.id, rowContent: { $story in
-                if story.item.url != nil {
-                    Button {
-                        selectedStory = story
-                    } label: {
-                        HStack {
+        Group {
+            switch type {
+            case .job:
+                List($stories.jobs, id: \.item.id, rowContent: { $story in
+                    if story.item.url != nil {
+                        Button {
+                            selectedStory = story
+                        } label: {
+                            HStack {
+                                StoryItemRow(story: $story)
+                                Spacer()
+                            }
+                        }
+                        .contentShape(Rectangle())
+                    } else {
+                        NavigationLink(value: story) {
                             StoryItemRow(story: $story)
-                            Spacer()
                         }
                     }
-                    .contentShape(Rectangle())
-                } else {
-                    NavigationLink {
-                        StoryView(story: story)
-                    } label: {
+                })
+            case .show:
+                List($stories.showStories, id: \.item.id, rowContent: { $story in
+                    NavigationLink(value: story) {
                         StoryItemRow(story: $story)
                     }
-                }
-            })
-        case .show:
-            List($stories.showStories, id: \.item.id, rowContent: { $story in
-                NavigationLink {
-                    StoryView(story: story)
-                } label: {
-                    StoryItemRow(story: $story)
-                }
-            })
-        default:
-            List($stories.feed, id: \.item.id, rowContent: { $story in
-                NavigationLink {
-                    StoryView(story: story)
-                } label: {
-                    StoryItemRow(story: $story)
-                }
-            })
+                })
+            default:
+                List($stories.feed, id: \.item.id, rowContent: { $story in
+                    NavigationLink(value: story) {
+                        StoryItemRow(story: $story)
+                    }
+                })
+            }
         }
+        .listStyle(.plain)
+        .navigationDestination(for: HNItemLocalizable.self, destination: { story in
+            StoryView(story: story)
+        })
+        .onDisappear {
+            cacheStories()
+        }
+        .refreshable {
+            if state == .readyForInteraction {
+                do {
+                    state = .loadingInitialData
+                    try await refreshStoryIDs()
+                    await refreshStories(useCache: false)
+                    currentPage = 0
+                    state = .readyForInteraction
+                } catch {
+                    overlayMode = .error
+                    overlayText = error.localizedDescription
+                    state = .initialized
+                }
+            }
+        }
+        .safeAreaInset(edge: .bottom, alignment: .center) {
+            Paginator(currentPage: $currentPage,
+                      totalPages: .constant((Int(ceil(Double(storyIDs.count) /
+                                                      Double(settings.pageStoryCount)))))) {
+                Task {
+                    isOverlayShowing = true
+                    currentPage -= 1
+                    cacheStories()
+                    await refreshStories()
+                    isOverlayShowing = false
+                }
+            } nextAction: {
+                Task {
+                    isOverlayShowing = true
+                    currentPage += 1
+                    cacheStories()
+                    await refreshStories()
+                    isOverlayShowing = false
+                }
+            }
+            .disabled(isOverlayShowing)
+            .background(.regularMaterial,
+                        in: RoundedRectangle(cornerRadius: 99, style: .continuous))
+            .padding()
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                if settings.titleLanguage == 0 {
+                    Image("TranslateBanner")
+                }
+            }
+        }
+        .navigationTitle(type.getConfig().viewTitle)
     }
 }

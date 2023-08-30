@@ -10,41 +10,47 @@ import SwiftUI
 
 struct MainTabView: View {
 
+    @EnvironmentObject var tabManager: TabManager
+    @EnvironmentObject var navigationManager: NavigationManager
     @EnvironmentObject var miniCache: CacheManager
     @EnvironmentObject var settings: SettingsManager
 
-    @State var defaultTab: Int = 0
-
     var body: some View {
-        TabView(selection: $defaultTab) {
+        TabView(selection: $tabManager.selectedTab) {
             StoriesView(type: settings.feedSort)
                 .tabItem {
                     Text("フィード")
                     Image(systemName: "newspaper.fill")
                 }
-                .tag(0)
+                .tag(TabType.feed)
             StoriesView(type: .job)
                 .tabItem {
                     Text("求人")
                     Image(systemName: "info.bubble.fill")
                 }
-                .tag(1)
+                .tag(TabType.jobs)
             StoriesView(type: .show)
                 .tabItem {
                     Text("展示")
                     Image(systemName: "sparkles.rectangle.stack.fill")
                 }
-                .tag(2)
+                .tag(TabType.show)
             MoreView()
                 .tabItem {
                     Text("その他")
                     Image(systemName: "ellipsis")
                 }
-                .tag(3)
+                .tag(TabType.more)
         }
         .task {
-            defaultTab = settings.startupTab
+            tabManager.selectedTab = TabType(rawValue: settings.startupTab) ?? .feed
             miniCache.cleanUp()
         }
+        .onReceive(tabManager.$selectedTab, perform: { newValue in
+            if newValue == tabManager.previouslySelectedTab {
+                navigationManager.popToRoot(for: newValue)
+            }
+            tabManager.previouslySelectedTab = newValue
+        })
     }
 }

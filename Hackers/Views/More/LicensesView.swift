@@ -131,19 +131,17 @@ SOFTWARE.
     ]
 
     var body: some View {
-        NavigationStack {
-            List(licenses, id: \.libraryName) { license in
-                Section {
-                    Text(license.text)
-                        .font(.caption)
-                        .monospaced()
-                } header: {
-                    ListSectionHeader(text: license.libraryName)
-                        .font(.body)
-                }
+        List(licenses, id: \.libraryName) { license in
+            Section {
+                Text(license.text)
+                    .font(.caption)
+                    .monospaced()
+            } header: {
+                ListSectionHeader(text: license.libraryName)
+                    .font(.body)
             }
-            .listStyle(.grouped)
-            .navigationTitle("著者権表記")
         }
+        .listStyle(.grouped)
+        .navigationTitle("著者権表記")
     }
 }
