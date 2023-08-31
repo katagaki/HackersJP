@@ -47,9 +47,11 @@ class CacheManager: ObservableObject {
     
     func cache(newItems: [HNItemLocalizable]) {
         for newItem in newItems {
+            var newItemWithCacheDate = newItem
+            newItemWithCacheDate.cacheDate = Date()
             debugPrint("[\(newItem.item.id)] Caching...")
             DispatchQueue.main.async { [self] in
-                items[newItem.item.id] = newItem
+                items[newItem.item.id] = newItemWithCacheDate
             }
         }
         save()

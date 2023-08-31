@@ -59,7 +59,7 @@ struct StoriesView: View {
                             overlayTotal: $overlayTotal)
                 }
             }
-            .animation(.default, value: isOverlayShowing)
+            .animation(.default.speed(1.5), value: isOverlayShowing)
         }
         .sheet(item: $selectedStory, onDismiss: {
             selectedStory = nil
@@ -104,7 +104,6 @@ struct StoriesView: View {
                                   decoder: JSONDecoder()).value
         overlayCurrent = 1
         overlayTotal = 1
-        overlayText = ""
     }
 
     func refreshStories(useCache: Bool = true) async {
@@ -120,9 +119,8 @@ struct StoriesView: View {
             for storyID in storyIDs[currentStartingIndex..<min(storyIDs.count, currentStartingIndex + settings.pageStoryCount)] {
                 group.addTask(priority: .high) {
                     if useCache,
-                       var cachedStory = await miniCache.item(for: storyID) {
+                       let cachedStory = await miniCache.item(for: storyID) {
                         debugPrint("[\(storyID)] Using cache...")
-                        cachedStory.requiresCaching = false
                         DispatchQueue.main.async {
                             overlayCurrent += 1
                         }
@@ -130,10 +128,7 @@ struct StoriesView: View {
                     } else {
                         do {
                             debugPrint("[\(storyID)] Fetching story...")
-                            var newLocalizableItem = try await fetchStory(storyID: storyID)
-                            debugPrint("[\(storyID)] Setting cache date...")
-                            newLocalizableItem.requiresCaching = true
-                            newLocalizableItem.cacheDate = Date()
+                            let newLocalizableItem = try await fetchStory(storyID: storyID)
                             DispatchQueue.main.async {
                                 overlayCurrent += 1
                             }
@@ -151,9 +146,7 @@ struct StoriesView: View {
             }
             return stories
         })
-        cacheStories()
-        overlayCurrent = 0
-        overlayTotal = 0
+        stories.storiesPendingCache.append(contentsOf: fetchedStories)
         switch type {
         case .top, .new, .best:
             stories.feed = fetchedStories
@@ -162,7 +155,6 @@ struct StoriesView: View {
         case .job:
             stories.jobs = fetchedStories
         }
-        overlayText = ""
     }
     
     func fetchStory(storyID: Int) async throws -> HNItemLocalizable {
@@ -203,20 +195,16 @@ struct StoriesView: View {
         try await translator.downloadModelIfNeeded()
         overlayCurrent = 1
         overlayTotal = 1
-        overlayText = ""
     }
 
     func cacheStories() {
-        miniCache.cache(newItems: stories.feed.filter { story in
-            story.requiresCaching
-        })
-        miniCache.cache(newItems: stories.jobs.filter { story in
-            story.requiresCaching
-        })
-        miniCache.cache(newItems: stories.showStories.filter { story in
-            story.requiresCaching
-        })
-        stories.setRequiresCachingToFalseForAll()
+        overlayMode = .progress
+        overlayText = "キャッシュ中…"
+        overlayCurrent = 0
+        overlayTotal = stories.storiesPendingCache.count
+        miniCache.cache(newItems: stories.storiesPendingCache)
+        overlayCurrent = stories.storiesPendingCache.count
+        overlayTotal = stories.storiesPendingCache.count
     }
     
     @ViewBuilder

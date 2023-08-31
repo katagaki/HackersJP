@@ -163,7 +163,6 @@ struct StoryView: View {
                             newLocalizableItem.textLocalized = try await translator
                                 .translate(commentItem.text ?? "")
                         }
-                        newLocalizableItem.cacheDate = Date()
                         return newLocalizableItem
                     } catch {
                         return nil

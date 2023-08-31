@@ -10,6 +10,7 @@ import SwiftUI
 
 struct StoryItemRow: View {
 
+    @EnvironmentObject var stories: StoryManager
     @EnvironmentObject var miniCache: CacheManager
     @EnvironmentObject var settings: SettingsManager
 
@@ -32,11 +33,13 @@ struct StoryItemRow: View {
                                 .frame(width: 12, height: 12)
                                 .fixedSize()
                                 .clipShape(RoundedRectangle(cornerRadius: 2.0))
+                                .transition(AnyTransition.opacity.animation(.default))
                         } else {
                             Image(systemName: "globe")
                                 .resizable()
                                 .frame(width: 12, height: 12)
                                 .fixedSize()
+                                .transition(AnyTransition.opacity.animation(.default))
                         }
                         Text(hostname)
                         Divider()
@@ -65,8 +68,9 @@ struct StoryItemRow: View {
                         debugPrint("[\(story.item.id)] Getting favicon from Internet...")
                         if let fetchedFaviconData = await story.downloadFavicon() {
                             favicon = UIImage(data: fetchedFaviconData)
-                            story.faviconData = fetchedFaviconData
-                            story.requiresCaching = true
+                            var newStory = story
+                            newStory.faviconData = fetchedFaviconData
+                            stories.storiesPendingCache.append(newStory)
                         } else {
                             story.faviconWasNotFoundOnLastFetch = true
                         }
