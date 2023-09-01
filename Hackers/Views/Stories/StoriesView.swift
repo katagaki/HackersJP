@@ -33,64 +33,64 @@ struct StoriesView: View {
 
     var body: some View {
         navigationStack()
-        .task {
-            if state == .initialized {
-                do {
-                    state = .loadingInitialData
+            .task {
+                if state == .initialized {
+                    do {
+                        state = .loadingInitialData
+                        isOverlayShowing = true
+                        try await downloadTranslationModel()
+                        try await refreshStoryIDs()
+                        await refreshStories(forPage: currentPage)
+                        isOverlayShowing = false
+                        state = .readyForInteraction
+                    } catch {
+                        overlayMode = .error
+                        overlayText = error.localizedDescription
+                        state = .initialized
+                    }
+                }
+            }
+            .overlay {
+                ZStack {
+                    if isOverlayShowing {
+                        Overlay(overlayMode: $overlayMode,
+                                overlayText: $overlayText,
+                                overlayCurrent: $overlayCurrent,
+                                overlayTotal: $overlayTotal)
+                    }
+                }
+                .animation(.default.speed(1.5), value: isOverlayShowing)
+            }
+            .sheet(item: $selectedStory, onDismiss: {
+                selectedStory = nil
+            }, content: { story in
+                if settings.linkLanguage == 0 {
+                    SafariView(url: URL(string: story.urlTranslated())!)
+                        .ignoresSafeArea()
+                } else {
+                    SafariView(url: URL(string: story.item.url!)!)
+                        .ignoresSafeArea()
+                }
+            })
+            .onChange(of: settings.feedSort, perform: { _ in
+                Task {
                     isOverlayShowing = true
-                    try await downloadTranslationModel()
-                    try await refreshStoryIDs()
-                    await refreshStories()
+                    if type == .top || type == .new || type == .best {
+                        type = settings.feedSort
+                        await refreshStories(forPage: 0)
+                        currentPage = 0
+                    }
                     isOverlayShowing = false
-                    state = .readyForInteraction
-                } catch {
-                    overlayMode = .error
-                    overlayText = error.localizedDescription
-                    state = .initialized
                 }
-            }
-        }
-        .overlay {
-            ZStack {
-                if isOverlayShowing {
-                    Overlay(overlayMode: $overlayMode,
-                            overlayText: $overlayText,
-                            overlayCurrent: $overlayCurrent,
-                            overlayTotal: $overlayTotal)
+            })
+            .onChange(of: settings.pageStoryCount, perform: { _ in
+                Task {
+                    isOverlayShowing = true
+                    await refreshStories(forPage: 0)
+                    currentPage = 0
+                    isOverlayShowing = false
                 }
-            }
-            .animation(.default.speed(1.5), value: isOverlayShowing)
-        }
-        .sheet(item: $selectedStory, onDismiss: {
-            selectedStory = nil
-        }, content: { story in
-            if settings.linkLanguage == 0 {
-                SafariView(url: URL(string: story.urlTranslated())!)
-                    .ignoresSafeArea()
-            } else {
-                SafariView(url: URL(string: story.item.url!)!)
-                    .ignoresSafeArea()
-            }
-        })
-        .onChange(of: settings.feedSort, perform: { _ in
-            Task {
-                isOverlayShowing = true
-                currentPage = 0
-                if type == .top || type == .new || type == .best {
-                    type = settings.feedSort
-                    await refreshStories()
-                }
-                isOverlayShowing = false
-            }
-        })
-        .onChange(of: settings.pageStoryCount, perform: { _ in
-            Task {
-                isOverlayShowing = true
-                currentPage = 0
-                await refreshStories()
-                isOverlayShowing = false
-            }
-        })
+            })
     }
 
     func refreshStoryIDs() async throws {
@@ -106,7 +106,7 @@ struct StoriesView: View {
         overlayTotal = 1
     }
 
-    func refreshStories(useCache: Bool = true) async {
+    func refreshStories(forPage page: Int, useCache: Bool = true) async {
         overlayMode = .progress
         overlayText = "記事内容を読み込み中…"
         overlayCurrent = 0
@@ -114,7 +114,7 @@ struct StoriesView: View {
         let fetchedStories = await withTaskGroup(of: HNItemLocalizable?.self,
                                       returning: [HNItemLocalizable].self, body: { group in
             var stories: [HNItemLocalizable] = []
-            let currentStartingIndex = currentPage * settings.pageStoryCount
+            let currentStartingIndex = page * settings.pageStoryCount
             overlayTotal = settings.pageStoryCount
             for storyID in storyIDs[currentStartingIndex..<min(storyIDs.count, currentStartingIndex + settings.pageStoryCount)] {
                 group.addTask(priority: .high) {
@@ -233,91 +233,103 @@ struct StoriesView: View {
 
     @ViewBuilder
     func storyList() -> some View {
-        Group {
-            switch type {
-            case .job:
-                List($stories.jobs, id: \.item.id, rowContent: { $story in
-                    if story.item.url != nil {
-                        Button {
-                            selectedStory = story
-                        } label: {
-                            HStack {
+        ScrollViewReader{ scrollView in
+            Group {
+                switch type {
+                case .job:
+                    List($stories.jobs, rowContent: { $story in
+                        if story.item.url != nil {
+                            Button {
+                                selectedStory = story
+                            } label: {
+                                HStack {
+                                    StoryItemRow(story: $story)
+                                    Spacer()
+                                }
+                            }
+                            .contentShape(Rectangle())
+                        } else {
+                            NavigationLink(value: story) {
                                 StoryItemRow(story: $story)
-                                Spacer()
                             }
                         }
-                        .contentShape(Rectangle())
-                    } else {
+                    })
+                case .show:
+                    List($stories.showStories, rowContent: { $story in
                         NavigationLink(value: story) {
                             StoryItemRow(story: $story)
                         }
-                    }
-                })
-            case .show:
-                List($stories.showStories, id: \.item.id, rowContent: { $story in
-                    NavigationLink(value: story) {
-                        StoryItemRow(story: $story)
-                    }
-                })
-            default:
-                List($stories.feed, id: \.item.id, rowContent: { $story in
-                    NavigationLink(value: story) {
-                        StoryItemRow(story: $story)
-                    }
-                })
-            }
-        }
-        .listStyle(.plain)
-        .navigationDestination(for: HNItemLocalizable.self, destination: { story in
-            StoryView(story: story)
-        })
-        .onDisappear {
-            cacheStories()
-        }
-        .refreshable {
-            if state == .readyForInteraction {
-                do {
-                    state = .loadingInitialData
-                    try await refreshStoryIDs()
-                    await refreshStories(useCache: false)
-                    currentPage = 0
-                    state = .readyForInteraction
-                } catch {
-                    overlayMode = .error
-                    overlayText = error.localizedDescription
-                    state = .initialized
+                    })
+                default:
+                    List($stories.feed, rowContent: { $story in
+                        NavigationLink(value: story) {
+                            StoryItemRow(story: $story)
+                        }
+                    })
                 }
             }
-        }
-        .safeAreaInset(edge: .bottom, alignment: .center) {
-            Paginator(currentPage: $currentPage,
-                      totalPages: .constant((Int(ceil(Double(storyIDs.count) /
-                                                      Double(settings.pageStoryCount)))))) {
-                Task {
-                    isOverlayShowing = true
-                    currentPage -= 1
-                    cacheStories()
-                    await refreshStories()
-                    isOverlayShowing = false
-                }
-            } nextAction: {
-                Task {
-                    isOverlayShowing = true
-                    currentPage += 1
-                    cacheStories()
-                    await refreshStories()
-                    isOverlayShowing = false
+            .listStyle(.plain)
+            .navigationDestination(for: HNItemLocalizable.self, destination: { story in
+                StoryView(story: story)
+            })
+            .onDisappear {
+                cacheStories()
+            }
+            .refreshable {
+                if state == .readyForInteraction {
+                    do {
+                        state = .loadingInitialData
+                        try await refreshStoryIDs()
+                        await refreshStories(forPage: 0, useCache: false)
+                        currentPage = 0
+                        state = .readyForInteraction
+                    } catch {
+                        overlayMode = .error
+                        overlayText = error.localizedDescription
+                        state = .initialized
+                    }
                 }
             }
-            .disabled(isOverlayShowing)
-            .background(.regularMaterial,
-                        in: RoundedRectangle(cornerRadius: 99, style: .continuous))
-            .padding()
-        }
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                if settings.titleLanguage == 0 {
-                    Image("TranslateBanner")
+            .safeAreaInset(edge: .bottom, alignment: .center) {
+                Paginator(currentPage: $currentPage,
+                          totalPages: .constant((Int(ceil(Double(storyIDs.count) /
+                                                          Double(settings.pageStoryCount)))))) {
+                    Task {
+                        isOverlayShowing = true
+                        cacheStories()
+                        await refreshStories(forPage: currentPage - 1)
+                        currentPage -= 1
+                        isOverlayShowing = false
+                    }
+                } nextAction: {
+                    Task {
+                        isOverlayShowing = true
+                        cacheStories()
+                        await refreshStories(forPage: currentPage + 1)
+                        currentPage += 1
+                        isOverlayShowing = false
+                    }
+                }
+                .disabled(isOverlayShowing)
+                .background(.regularMaterial,
+                            in: RoundedRectangle(cornerRadius: 99, style: .continuous))
+                .padding()
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if settings.titleLanguage == 0 {
+                        Image("TranslateBanner")
+                    }
+                }
+            }
+            .onChange(of: currentPage) { _ in
+                switch type {
+                case .show:
+                    scrollView.scrollTo(stories.showStories.first!.id)
+                case .job:
+                    scrollView.scrollTo(stories.jobs.first!.id)
+                default:
+                    scrollView.scrollTo(stories.feed.first!.id)
                 }
             }
         }

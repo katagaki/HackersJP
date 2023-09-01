@@ -16,7 +16,6 @@ struct StoryItemRow: View {
 
     @Binding var story: HNItemLocalizable
     @State var state: ViewState = .initialized
-    @State var favicon: UIImage? = nil
 
     var body: some View {
         if story.item.id != -1 {
@@ -27,20 +26,22 @@ struct StoryItemRow: View {
                     .layoutPriority(1)
                 HStack(alignment: .center, spacing: 4.0) {
                     if let hostname = story.hostname() {
-                       if let favicon = favicon {
-                            Image(uiImage: favicon)
-                                .resizable()
-                                .frame(width: 12, height: 12)
-                                .fixedSize()
-                                .clipShape(RoundedRectangle(cornerRadius: 2.0))
-                                .transition(AnyTransition.opacity.animation(.default))
-                        } else {
-                            Image(systemName: "globe")
-                                .resizable()
-                                .frame(width: 12, height: 12)
-                                .fixedSize()
-                                .transition(AnyTransition.opacity.animation(.default))
+                        Group {
+                            if story.faviconData == nil && story.faviconWasNotFoundOnLastFetch {
+                                Image(systemName: "globe")
+                                    .resizable()
+                            } else if let storedFavicon = story.favicon() {
+                                Image(uiImage: storedFavicon)
+                                    .resizable()
+                                    .clipShape(RoundedRectangle(cornerRadius: 2.0))
+                                    .transition(AnyTransition.opacity.animation(.default))
+                            } else {
+                                Image(systemName: "globe")
+                                    .resizable()
+                            }
                         }
+                        .frame(width: 12, height: 12)
+                        .fixedSize()
                         Text(hostname)
                         Divider()
                     }
@@ -59,18 +60,11 @@ struct StoryItemRow: View {
             .task {
                 if state == .initialized {
                     state = .loadingInitialData
-                    if story.faviconData == nil && story.faviconWasNotFoundOnLastFetch {
-                        debugPrint("[\(story.item.id)] Using null favicon...")
-                    } else if let storedFavicon = story.favicon() {
-                        debugPrint("[\(story.item.id)] Getting favicon from cache...")
-                        favicon = storedFavicon
-                    } else {
+                    if story.faviconData == nil && !story.faviconWasNotFoundOnLastFetch {
                         debugPrint("[\(story.item.id)] Getting favicon from Internet...")
                         if let fetchedFaviconData = await story.downloadFavicon() {
-                            favicon = UIImage(data: fetchedFaviconData)
-                            var newStory = story
-                            newStory.faviconData = fetchedFaviconData
-                            stories.storiesPendingCache.append(newStory)
+                            story.faviconData = fetchedFaviconData
+                            stories.storiesPendingCache.append(story)
                         } else {
                             story.faviconWasNotFoundOnLastFetch = true
                         }
