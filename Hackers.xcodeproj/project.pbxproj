@@ -248,6 +248,7 @@
 				E46652B22A9463CB0048BA05 /* Resources */,
 				EC459D93D2F4344BD469EC7B /* [CP] Embed Pods Frameworks */,
 				84E9FC94110DD0797DDB7332 /* [CP] Copy Pods Resources */,
+				E407C6882AA5808A004D8128 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -350,6 +351,24 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Hackers/Pods-Hackers-resources.sh\"\n";
 			showEnvVarsInLog = 0;
+		};
+		E407C6882AA5808A004D8128 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftlint > /dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
 		EC459D93D2F4344BD469EC7B /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;

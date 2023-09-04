@@ -18,7 +18,7 @@ struct CommentItemRow: View {
             HStack(alignment: .center, spacing: 4.0) {
                 Text(comment.item.by)
                 Divider()
-                Text(Date(timeIntervalSince1970: TimeInterval(comment.item.time)), 
+                Text(Date(timeIntervalSince1970: TimeInterval(comment.item.time)),
                      style: .relative)
             }
             .font(.caption)

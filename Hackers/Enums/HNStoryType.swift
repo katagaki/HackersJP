@@ -13,7 +13,7 @@ enum HNStoryType: Int {
     case best = 2
     case show = 3
     case job = 4
-    
+
     func getConfig() -> HNStoryConfiguration {
         switch self {
         case .top:
@@ -26,10 +26,10 @@ enum HNStoryType: Int {
             return HNStoryConfiguration(jsonName: "beststories",
                                         viewTitle: "フィード")
         case .show:
-            return HNStoryConfiguration(jsonName: "showstories", 
+            return HNStoryConfiguration(jsonName: "showstories",
                                         viewTitle: "展示")
         case .job:
-            return HNStoryConfiguration(jsonName: "jobstories", 
+            return HNStoryConfiguration(jsonName: "jobstories",
                                         viewTitle: "求人")
         }
     }

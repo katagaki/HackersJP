@@ -23,7 +23,7 @@ class CacheManager: ObservableObject {
                 debugPrint(error.localizedDescription)
             }
         }
-        
+
         do {
             if let data = defaults.data(forKey: "MiniCache") {
                 items = try decoder.decode([Int: HNItemLocalizable].self, from: data)
@@ -32,7 +32,7 @@ class CacheManager: ObservableObject {
             debugPrint(error.localizedDescription)
         }
     }
-    
+
     func usedSpace() -> Int {
         if let data = defaults.data(forKey: "MiniCache") {
             return data.count
@@ -44,7 +44,7 @@ class CacheManager: ObservableObject {
         items.removeAll()
         save()
     }
-    
+
     func cache(newItems: [HNItemLocalizable]) {
         for newItem in newItems {
             var newItemWithCacheDate = newItem
@@ -81,7 +81,7 @@ class CacheManager: ObservableObject {
             debugPrint(error.localizedDescription)
         }
     }
-    
+
     func cleanUp() {
         let now = Date()
         for (key, value) in items {

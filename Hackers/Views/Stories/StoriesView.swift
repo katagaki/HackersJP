@@ -23,7 +23,7 @@ struct StoriesView: View {
     @State var state: ViewState = .initialized
     @State var type: HNStoryType
     @State var storyIDs: [Int] = []
-    @State var selectedStory: HNItemLocalizable? = nil
+    @State var selectedStory: HNItemLocalizable?
     @State var isOverlayShowing: Bool = false
     @State var overlayMode: OverlayMode = .progress
     @State var overlayText: String = "準備中…"
@@ -94,29 +94,23 @@ struct StoriesView: View {
     }
 
     func refreshStoryIDs() async throws {
-        overlayMode = .progress
-        overlayText = "記事を読み込み中…"
-        overlayCurrent = 0
-        overlayTotal = 1
+        setOverlay("記事を読み込み中…", .progress, 0, 1)
         let jsonURL = "\(apiEndpoint)/\(type.getConfig().jsonName).json"
         storyIDs = try await AF.request(jsonURL, method: .get)
             .serializingDecodable([Int].self,
                                   decoder: JSONDecoder()).value
-        overlayCurrent = 1
-        overlayTotal = 1
+        setOverlay("記事を読み込み中…", .progress, 1, 1)
     }
 
     func refreshStories(forPage page: Int, useCache: Bool = true) async {
-        overlayMode = .progress
-        overlayText = "記事内容を読み込み中…"
-        overlayCurrent = 0
-        overlayTotal = 0
+        setOverlay("記事内容を読み込み中…", .progress, 0, 0)
         let fetchedStories = await withTaskGroup(of: HNItemLocalizable?.self,
                                       returning: [HNItemLocalizable].self, body: { group in
             var stories: [HNItemLocalizable] = []
             let currentStartingIndex = page * settings.pageStoryCount
+            let lastPageToFetch = min(storyIDs.count, currentStartingIndex + settings.pageStoryCount)
             overlayTotal = settings.pageStoryCount
-            for storyID in storyIDs[currentStartingIndex..<min(storyIDs.count, currentStartingIndex + settings.pageStoryCount)] {
+            for storyID in storyIDs[currentStartingIndex..<lastPageToFetch] {
                 group.addTask(priority: .high) {
                     if useCache,
                        let cachedStory = await miniCache.item(for: storyID) {
@@ -156,7 +150,7 @@ struct StoriesView: View {
             stories.jobs = fetchedStories
         }
     }
-    
+
     func fetchStory(storyID: Int) async throws -> HNItemLocalizable {
         let storyItem = try await AF.request("\(apiEndpoint)/item/\(storyID).json",
                                              method: .get)
@@ -188,25 +182,25 @@ struct StoriesView: View {
     }
 
     func downloadTranslationModel() async throws {
-        overlayMode = .progress
-        overlayText = "翻訳用リソースをダウンロード中…"
-        overlayCurrent = 0
-        overlayTotal = 1
+        setOverlay("翻訳用リソースをダウンロード中…", .progress, 0, 1)
         try await translator.downloadModelIfNeeded()
-        overlayCurrent = 1
-        overlayTotal = 1
+        setOverlay("翻訳用リソースをダウンロード中…", .progress, 1, 1)
     }
 
     func cacheStories() {
-        overlayMode = .progress
-        overlayText = "キャッシュ中…"
-        overlayCurrent = 0
-        overlayTotal = stories.storiesPendingCache.count
+        let numberOfStoriesToCache = stories.storiesPendingCache.count
+        setOverlay("キャッシュ中…", .progress, 0, numberOfStoriesToCache)
         miniCache.cache(newItems: stories.storiesPendingCache)
-        overlayCurrent = stories.storiesPendingCache.count
-        overlayTotal = stories.storiesPendingCache.count
+        setOverlay("キャッシュ中…", .progress, numberOfStoriesToCache, numberOfStoriesToCache)
     }
-    
+
+    func setOverlay(_ text: String, _ mode: OverlayMode, _ current: Int, _ total: Int) {
+        overlayMode = mode
+        overlayText = text
+        overlayCurrent = current
+        overlayTotal = total
+    }
+
     @ViewBuilder
     func navigationStack() -> some View {
         switch type {
@@ -231,9 +225,10 @@ struct StoriesView: View {
         }
     }
 
+    // swiftlint:disable function_body_length
     @ViewBuilder
     func storyList() -> some View {
-        ScrollViewReader{ scrollView in
+        ScrollViewReader { scrollView in
             Group {
                 switch type {
                 case .job:
@@ -335,4 +330,5 @@ struct StoriesView: View {
         }
         .navigationTitle(type.getConfig().viewTitle)
     }
+    // swiftlint:enable function_body_length
 }

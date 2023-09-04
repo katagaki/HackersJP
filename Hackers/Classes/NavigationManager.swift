@@ -27,6 +27,7 @@ class NavigationManager: ObservableObject {
         }
     }
 
+    // swiftlint:disable force_cast
     func push(_ viewPath: AnyObject, for tab: TabType) {
         switch tab {
         case .feed:
@@ -39,6 +40,7 @@ class NavigationManager: ObservableObject {
             moreTabPath.append(viewPath as! ViewPath)
         }
     }
+    // swiftlint:enable force_cast
 
     func pop(for tab: TabType) {
         switch tab {

@@ -17,7 +17,7 @@ struct StoryView: View {
     let translator = Translator.translator(
         options: TranslatorOptions(sourceLanguage: .english,
                                    targetLanguage: .japanese))
-    
+
     @State var state: ViewState = .initialized
     @State var story: HNItemLocalizable
     @State var comments: [HNItemLocalizable] = []
@@ -59,13 +59,20 @@ struct StoryView: View {
                         Button {
                             isSafariViewControllerPresenting = true
                         } label: {
-                            if story.faviconData != nil,
-                               let favicon = story.favicon() {
-                                Image(uiImage: favicon)
-                                    .resizable()
-                                    .frame(width: 20, height: 20)
-                                    .fixedSize()
-                                    .clipShape(RoundedRectangle(cornerRadius: 2.0))
+                            if let storedFaviconURL = story.faviconURL,
+                               let faviconURL = URL(string: storedFaviconURL) {
+                                AsyncImage(url: faviconURL) { image in
+                                    image
+                                        .resizable()
+                                        .frame(width: 20, height: 20)
+                                        .fixedSize()
+                                        .clipShape(RoundedRectangle(cornerRadius: 2.0))
+                                } placeholder: {
+                                    Image(systemName: "safari")
+                                        .resizable()
+                                        .frame(width: 20, height: 20)
+                                        .fixedSize()
+                                }
                             } else {
                                 Image(systemName: "safari")
                                     .resizable()

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct LicensesView: View {
 
+    // swiftlint:disable line_length
     @State var licenses: [License] = [
     License(libraryName: "Alamofire", text:
 """
@@ -129,6 +130,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """)
     ]
+    // swiftlint:enable line_length
 
     var body: some View {
         List(licenses, id: \.libraryName) { license in

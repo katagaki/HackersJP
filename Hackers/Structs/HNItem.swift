@@ -7,6 +7,7 @@
 
 import Foundation
 
+// swiftlint:disable identifier_name
 struct HNItem: Codable {
     var id: Int
     var deleted: Bool?
@@ -24,3 +25,4 @@ struct HNItem: Codable {
     var parts: [Int]?
     var descendants: Int?
 }
+// swiftlint:enable identifier_name

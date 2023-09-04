@@ -5,7 +5,6 @@
 //  Created by シンジャスティン on 2023/08/25.
 //
 
-import FaviconFinder
 import Foundation
 import SwiftSoup
 import UIKit
@@ -23,18 +22,19 @@ struct HNItemLocalizable: Identifiable, Equatable, Hashable, Codable {
     var titleLocalized: String = ""
     var textLocalized: String = ""
     var isShowHNStory: Bool = false
-    var faviconData: Data? = nil
+    var faviconURL: String?
     var faviconWasNotFoundOnLastFetch: Bool = false
-    var cacheDate: Date? = nil
+    var cacheDate: Date?
 
     static func == (lhs: HNItemLocalizable, rhs: HNItemLocalizable) -> Bool {
-        lhs.id == rhs.id && lhs.faviconData == rhs.faviconData
+        lhs.id == rhs.id && lhs.faviconURL == rhs.faviconURL
     }
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
 
+    // swiftlint:disable line_length
     func urlTranslated() -> String {
         if let itemURL = item.url,
            let url = URL(string: itemURL) {
@@ -48,6 +48,7 @@ struct HNItemLocalizable: Identifiable, Equatable, Hashable, Codable {
         }
         return ""
     }
+    // swiftlint:enable line_length
 
     func hostname() -> String? {
         if let url = item.url {
@@ -55,34 +56,6 @@ struct HNItemLocalizable: Identifiable, Equatable, Hashable, Codable {
         } else {
             return nil
         }
-    }
-    
-    func favicon() -> UIImage? {
-        if let favicon = faviconData {
-            return UIImage(data: favicon) ?? nil
-        }
-        return nil
-    }
-
-    func downloadFavicon() async -> Data? {
-        if let url = item.url {
-            do {
-                let downloadedFavicon = try await FaviconFinder(
-                    url: URL(string: url)!,
-                    preferredType: .html,
-                    preferences: [
-                        .html: FaviconType.appleTouchIconPrecomposed.rawValue,
-                        .ico: "favicon.ico",
-                        .webApplicationManifestFile: FaviconType.launcherIcon4x.rawValue
-                    ]
-                ).downloadFavicon()
-                return downloadedFavicon.image.pngData()
-            } catch {
-                debugPrint(error.localizedDescription)
-                return nil
-            }
-        }
-        return nil
     }
 
     func textDeformatted() -> String? {
