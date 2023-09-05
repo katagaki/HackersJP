@@ -35,7 +35,14 @@ struct StoriesView: View {
         navigationStack()
             .task {
                 if state == .initialized {
-                    await refreshAll()
+                    do {
+                        try await downloadTranslationModel()
+                        await refreshAll()
+                    } catch {
+                        footerMode = .error
+                        footerText = error.localizedDescription
+                        state = .initialized
+                    }
                 }
             }
             .sheet(item: $selectedStory, onDismiss: {
