@@ -112,6 +112,7 @@ struct StoryView: View {
                            footerText: .constant("コメントを読み込み中…"),
                            footerCurrent: $footerCurrent,
                            footerTotal: $footerTotal)
+                .listRowSeparator(.hidden)
             }
         }
         .listStyle(.plain)
