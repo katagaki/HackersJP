@@ -17,9 +17,6 @@ A Hacker News app for Japanese readers.
 - Sharing story and HN URLs
 - Automatic translation of story titles to Japanese using Google's ML Kit
 
-### What's planned
-- Paginated scrolling
-
 ## Building
 
 ### Step 1: Update CocoaPods
