@@ -23,7 +23,6 @@ struct HNItemLocalizable: Identifiable, Equatable, Hashable, Codable {
     var textLocalized: String = ""
     var isShowHNStory: Bool = false
     var faviconURL: String?
-    var faviconWasNotFoundOnLastFetch: Bool = false
     var cacheDate: Date?
 
     static func == (lhs: HNItemLocalizable, rhs: HNItemLocalizable) -> Bool {

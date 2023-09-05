@@ -6,6 +6,7 @@
 //
 
 import Alamofire
+import FaviconFinder
 import MLKitTranslate
 import SwiftUI
 
@@ -177,6 +178,25 @@ struct StoriesView: View {
         } else {
             newLocalizableItem.textLocalized = try await translator
                 .translate(storyItem.text ?? "")
+        }
+        debugPrint("[\(storyID)] Getting favicon...")
+        if let url = storyItem.url {
+            do {
+                let fetchedFavicon = try await FaviconFinder(
+                    url: URL(string: url)!,
+                    preferredType: .html,
+                    preferences: [
+                        .html: FaviconType.appleTouchIconPrecomposed.rawValue,
+                        .ico: "favicon.ico",
+                        .webApplicationManifestFile: FaviconType.launcherIcon4x.rawValue
+                    ],
+                    downloadImage: false,
+                    logEnabled: true
+                ).downloadFavicon()
+                newLocalizableItem.faviconURL = fetchedFavicon.url.absoluteString
+            } catch {
+                debugPrint(error.localizedDescription)
+            }
         }
         return newLocalizableItem
     }

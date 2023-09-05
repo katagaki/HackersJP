@@ -5,7 +5,6 @@
 //  Created by シンジャスティン on 2023/08/23.
 //
 
-import FaviconFinder
 import SwiftUI
 
 struct StoryItemRow: View {
@@ -60,45 +59,6 @@ struct StoryItemRow: View {
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             }
-            .task {
-                if state == .initialized {
-                    state = .loadingInitialData
-                    if story.faviconURL == nil && !story.faviconWasNotFoundOnLastFetch {
-                        debugPrint("[\(story.item.id)] Getting favicon from Internet...")
-                        if let fetchedFaviconURL = await getFaviconURL() {
-                            story.faviconURL = fetchedFaviconURL
-                            stories.storiesPendingCache.append(story)
-                        } else {
-                            story.faviconWasNotFoundOnLastFetch = true
-                        }
-                    }
-                    state = .readyForPresentation
-                }
-            }
         }
     }
-
-    func getFaviconURL() async -> String? {
-        if let url = story.item.url {
-            do {
-                let fetchedFavicon = try await FaviconFinder(
-                    url: URL(string: url)!,
-                    preferredType: .html,
-                    preferences: [
-                        .html: FaviconType.appleTouchIconPrecomposed.rawValue,
-                        .ico: "favicon.ico",
-                        .webApplicationManifestFile: FaviconType.launcherIcon4x.rawValue
-                    ],
-                    downloadImage: false,
-                    logEnabled: true
-                ).downloadFavicon()
-                return fetchedFavicon.url.absoluteString
-            } catch {
-                debugPrint(error.localizedDescription)
-                return nil
-            }
-        }
-        return nil
-    }
-
 }
