@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CacheView: View {
 
-    @EnvironmentObject var miniCache: CacheManager
+    @EnvironmentObject var stories: StoryManager
 
     var body: some View {
         List {
@@ -23,7 +23,7 @@ struct CacheView: View {
                         .foregroundStyle(.secondary)
                 }
                 Button {
-                    miniCache.clear()
+                    stories.clearCache()
                 } label: {
                     Text("キャッシュをクリア")
                         .font(.body)
@@ -34,7 +34,7 @@ struct CacheView: View {
                     .font(.body)
             }
             Section {
-                ForEach(Array(miniCache.items.values.sorted(by: { lhs, rhs in
+                ForEach(Array(stories.cache.values.sorted(by: { lhs, rhs in
                     lhs.cacheDate ?? Date() < rhs.cacheDate ?? Date()
                 }))) { cachedItem in
                     HStack(alignment: .center, spacing: 8) {
@@ -60,6 +60,6 @@ struct CacheView: View {
         let formatter = ByteCountFormatter()
         formatter.allowedUnits = [.useKB, .useMB]
         formatter.countStyle = .file
-        return formatter.string(fromByteCount: Int64(miniCache.usedSpace()))
+        return formatter.string(fromByteCount: Int64(stories.usedCacheSpace()))
     }
 }

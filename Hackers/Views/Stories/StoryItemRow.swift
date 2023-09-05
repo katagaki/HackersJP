@@ -10,7 +10,6 @@ import SwiftUI
 struct StoryItemRow: View {
 
     @EnvironmentObject var stories: StoryManager
-    @EnvironmentObject var miniCache: CacheManager
     @EnvironmentObject var settings: SettingsManager
 
     @Binding var story: HNItemLocalizable

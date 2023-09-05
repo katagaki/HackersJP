@@ -14,7 +14,6 @@ struct StoriesView: View {
 
     @EnvironmentObject var navigationManager: NavigationManager
     @EnvironmentObject var stories: StoryManager
-    @EnvironmentObject var miniCache: CacheManager
     @EnvironmentObject var settings: SettingsManager
 
     let translator = Translator.translator(
@@ -24,6 +23,7 @@ struct StoriesView: View {
     @State var state: ViewState = .initialized
     @State var type: HNStoryType
     @State var storyIDs: [Int] = []
+    @State var displayedStories: [HNItemLocalizable] = []
     @State var selectedStory: HNItemLocalizable?
     @State var isOverlayShowing: Bool = false
     @State var overlayMode: OverlayMode = .progress
@@ -94,6 +94,22 @@ struct StoriesView: View {
             })
     }
 
+    func refreshAll() async {
+        if state == .readyForInteraction {
+            do {
+                state = .loadingInitialData
+                try await refreshStoryIDs()
+                await refreshStories(forPage: 0, useCache: false)
+                currentPage = 0
+                state = .readyForInteraction
+            } catch {
+                overlayMode = .error
+                overlayText = error.localizedDescription
+                state = .initialized
+            }
+        }
+    }
+
     func refreshStoryIDs() async throws {
         setOverlay("記事を読み込み中…", .progress, 0, 1)
         let jsonURL = "\(apiEndpoint)/\(type.getConfig().jsonName).json"
@@ -104,114 +120,20 @@ struct StoriesView: View {
     }
 
     func refreshStories(forPage page: Int, useCache: Bool = true) async {
-        setOverlay("記事内容を読み込み中…", .progress, 0, 0)
-        let fetchedStories = await withTaskGroup(of: HNItemLocalizable?.self,
-                                      returning: [HNItemLocalizable].self, body: { group in
-            var stories: [HNItemLocalizable] = []
-            let currentStartingIndex = page * settings.pageStoryCount
-            let lastPageToFetch = min(storyIDs.count, currentStartingIndex + settings.pageStoryCount)
-            overlayTotal = settings.pageStoryCount
-            for storyID in storyIDs[currentStartingIndex..<lastPageToFetch] {
-                group.addTask(priority: .high) {
-                    if useCache,
-                       let cachedStory = await miniCache.item(for: storyID) {
-                        debugPrint("[\(storyID)] Using cache...")
-                        DispatchQueue.main.async {
-                            overlayCurrent += 1
-                        }
-                        return cachedStory
-                    } else {
-                        do {
-                            debugPrint("[\(storyID)] Fetching story...")
-                            let newLocalizableItem = try await fetchStory(storyID: storyID)
-                            DispatchQueue.main.async {
-                                overlayCurrent += 1
-                            }
-                            return newLocalizableItem
-                        } catch {
-                            return nil
-                        }
-                    }
-                }
-            }
-            for await result in group {
-                if let result = result {
-                    stories.append(result)
-                }
-            }
-            return stories
+        let currentStartingIndex = page * settings.pageStoryCount
+        let lastPageToFetch = min(storyIDs.count, currentStartingIndex + settings.pageStoryCount)
+        let idsToFetch = Array(storyIDs[currentStartingIndex..<lastPageToFetch])
+        setOverlay("記事内容を読み込み中…", .progress, 0, idsToFetch.count)
+        displayedStories = await stories.fetchStories(ids: idsToFetch,
+                                                translator: translator, storyFetchedAction: {
+            overlayCurrent += 1
         })
-        stories.storiesPendingCache.append(contentsOf: fetchedStories)
-        switch type {
-        case .top, .new, .best:
-            stories.feed = fetchedStories
-        case .show:
-            stories.showStories = fetchedStories
-        case .job:
-            stories.jobs = fetchedStories
-        }
-    }
-
-    func fetchStory(storyID: Int) async throws -> HNItemLocalizable {
-        let storyItem = try await AF.request("\(apiEndpoint)/item/\(storyID).json",
-                                             method: .get)
-            .serializingDecodable(HNItem.self,
-                                  decoder: JSONDecoder()).value
-        debugPrint("[\(storyID)] Creating localizable object...")
-        var newLocalizableItem = HNItemLocalizable(item: storyItem)
-        debugPrint("[\(storyID)] Localizing title...")
-        if let title = newLocalizableItem.item.title {
-            if title.starts(with: "Show HN: ") {
-                newLocalizableItem.isShowHNStory = true
-                newLocalizableItem.item.title = title.replacingOccurrences(of: "Show HN: ", with: "")
-                newLocalizableItem.titleLocalized = try await translator
-                    .translate(title.replacingOccurrences(of: "Show HN: ", with: ""))
-            } else {
-                newLocalizableItem.titleLocalized = try await translator
-                    .translate(title)
-            }
-        }
-        debugPrint("[\(storyID)] Localizing text...")
-        if let textDeformatted = newLocalizableItem.textDeformatted() {
-            newLocalizableItem.textLocalized = try await translator
-                .translate(textDeformatted)
-        } else {
-            newLocalizableItem.textLocalized = try await translator
-                .translate(storyItem.text ?? "")
-        }
-        debugPrint("[\(storyID)] Getting favicon...")
-        if let url = storyItem.url {
-            do {
-                let fetchedFavicon = try await FaviconFinder(
-                    url: URL(string: url)!,
-                    preferredType: .html,
-                    preferences: [
-                        .html: FaviconType.appleTouchIconPrecomposed.rawValue,
-                        .ico: "favicon.ico",
-                        .webApplicationManifestFile: FaviconType.launcherIcon4x.rawValue
-                    ],
-                    downloadImage: false,
-                    logEnabled: true
-                ).downloadFavicon()
-                newLocalizableItem.faviconURL = fetchedFavicon.url.absoluteString
-            } catch {
-                debugPrint(error.localizedDescription)
-            }
-        }
-        return newLocalizableItem
     }
 
     func downloadTranslationModel() async throws {
         setOverlay("翻訳用リソースをダウンロード中…", .progress, 0, 1)
         try await translator.downloadModelIfNeeded()
         setOverlay("翻訳用リソースをダウンロード中…", .progress, 1, 1)
-    }
-
-    func cacheStories() {
-        let numberOfStoriesToCache = stories.storiesPendingCache.count
-        setOverlay("キャッシュ中…", .progress, 0, numberOfStoriesToCache)
-        miniCache.cache(newItems: stories.storiesPendingCache)
-        setOverlay("キャッシュ中…", .progress, numberOfStoriesToCache, numberOfStoriesToCache)
     }
 
     func setOverlay(_ text: String, _ mode: OverlayMode, _ current: Int, _ total: Int) {
@@ -245,90 +167,35 @@ struct StoriesView: View {
         }
     }
 
-    // swiftlint:disable function_body_length
     @ViewBuilder
     func storyList() -> some View {
         ScrollViewReader { scrollView in
-            Group {
-                switch type {
-                case .job:
-                    List($stories.jobs, rowContent: { $story in
-                        if story.item.url != nil {
-                            Button {
-                                selectedStory = story
-                            } label: {
-                                HStack {
-                                    StoryItemRow(story: $story)
-                                    Spacer()
-                                }
-                            }
-                            .contentShape(Rectangle())
-                        } else {
-                            NavigationLink(value: story) {
-                                StoryItemRow(story: $story)
-                            }
-                        }
-                    })
-                case .show:
-                    List($stories.showStories, rowContent: { $story in
-                        NavigationLink(value: story) {
+            List($displayedStories, rowContent: { $story in
+                if story.item.url != nil {
+                    Button {
+                        selectedStory = story
+                    } label: {
+                        HStack {
                             StoryItemRow(story: $story)
+                            Spacer()
                         }
-                    })
-                default:
-                    List($stories.feed, rowContent: { $story in
-                        NavigationLink(value: story) {
-                            StoryItemRow(story: $story)
-                        }
-                    })
+                    }
+                    .contentShape(Rectangle())
+                } else {
+                    NavigationLink(value: story) {
+                        StoryItemRow(story: $story)
+                    }
                 }
-            }
+            })
             .listStyle(.plain)
             .navigationDestination(for: HNItemLocalizable.self, destination: { story in
                 StoryView(story: story)
             })
-            .onDisappear {
-                cacheStories()
-            }
             .refreshable {
-                if state == .readyForInteraction {
-                    do {
-                        state = .loadingInitialData
-                        try await refreshStoryIDs()
-                        await refreshStories(forPage: 0, useCache: false)
-                        currentPage = 0
-                        state = .readyForInteraction
-                    } catch {
-                        overlayMode = .error
-                        overlayText = error.localizedDescription
-                        state = .initialized
-                    }
-                }
+                await refreshAll()
             }
             .safeAreaInset(edge: .bottom, alignment: .center) {
-                Paginator(currentPage: $currentPage,
-                          totalPages: .constant((Int(ceil(Double(storyIDs.count) /
-                                                          Double(settings.pageStoryCount)))))) {
-                    Task {
-                        isOverlayShowing = true
-                        cacheStories()
-                        await refreshStories(forPage: currentPage - 1)
-                        currentPage -= 1
-                        isOverlayShowing = false
-                    }
-                } nextAction: {
-                    Task {
-                        isOverlayShowing = true
-                        cacheStories()
-                        await refreshStories(forPage: currentPage + 1)
-                        currentPage += 1
-                        isOverlayShowing = false
-                    }
-                }
-                .disabled(isOverlayShowing)
-                .background(.regularMaterial,
-                            in: RoundedRectangle(cornerRadius: 99, style: .continuous))
-                .padding()
+                paginator()
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -338,17 +205,36 @@ struct StoriesView: View {
                 }
             }
             .onChange(of: currentPage) { _ in
-                switch type {
-                case .show:
-                    scrollView.scrollTo(stories.showStories.first!.id)
-                case .job:
-                    scrollView.scrollTo(stories.jobs.first!.id)
-                default:
-                    scrollView.scrollTo(stories.feed.first!.id)
+                if let firstStory = displayedStories.first {
+                    scrollView.scrollTo(firstStory.id)
                 }
             }
         }
         .navigationTitle(type.getConfig().viewTitle)
     }
-    // swiftlint:enable function_body_length
+
+    @ViewBuilder
+    func paginator() -> some View {
+        Paginator(currentPage: $currentPage,
+                  totalPages: .constant((Int(ceil(Double(storyIDs.count) /
+                                                  Double(settings.pageStoryCount)))))) {
+            Task {
+                isOverlayShowing = true
+                await refreshStories(forPage: currentPage - 1)
+                currentPage -= 1
+                isOverlayShowing = false
+            }
+        } nextAction: {
+            Task {
+                isOverlayShowing = true
+                await refreshStories(forPage: currentPage + 1)
+                currentPage += 1
+                isOverlayShowing = false
+            }
+        }
+        .disabled(isOverlayShowing)
+        .background(.regularMaterial,
+                    in: RoundedRectangle(cornerRadius: 99, style: .continuous))
+        .padding()
+    }
 }

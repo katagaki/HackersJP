@@ -12,7 +12,7 @@ struct MainTabView: View {
 
     @EnvironmentObject var tabManager: TabManager
     @EnvironmentObject var navigationManager: NavigationManager
-    @EnvironmentObject var miniCache: CacheManager
+    @EnvironmentObject var stories: StoryManager
     @EnvironmentObject var settings: SettingsManager
 
     var body: some View {
@@ -44,7 +44,7 @@ struct MainTabView: View {
         }
         .task {
             tabManager.selectedTab = TabType(rawValue: settings.startupTab) ?? .feed
-            miniCache.cleanUp()
+            stories.cleanUpCache()
         }
         .onReceive(tabManager.$selectedTab, perform: { newValue in
             if newValue == tabManager.previouslySelectedTab {

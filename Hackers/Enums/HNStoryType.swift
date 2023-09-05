@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum HNStoryType: Int {
+enum HNStoryType: Int, Codable {
     case top = 0
     case new = 1
     case best = 2

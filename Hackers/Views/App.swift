@@ -13,7 +13,6 @@ struct HackersApp: App {
     @StateObject var tabManager = TabManager()
     @StateObject var navigationManager = NavigationManager()
     @StateObject var stories = StoryManager()
-    @StateObject var miniCache = CacheManager()
     @StateObject var settings = SettingsManager()
 
     var body: some Scene {
@@ -22,7 +21,6 @@ struct HackersApp: App {
                 .environmentObject(tabManager)
                 .environmentObject(navigationManager)
                 .environmentObject(stories)
-                .environmentObject(miniCache)
                 .environmentObject(settings)
         }
     }

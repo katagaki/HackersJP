@@ -11,8 +11,8 @@ import SwiftUI
 
 struct StoryView: View {
 
-    @EnvironmentObject var miniCache: CacheManager
     @EnvironmentObject var settings: SettingsManager
+    @EnvironmentObject var stories: StoryManager
 
     let translator = Translator.translator(
         options: TranslatorOptions(sourceLanguage: .english,
@@ -147,42 +147,10 @@ struct StoryView: View {
     }
 
     func refreshComments(useCache: Bool = true) async {
-        comments = await withTaskGroup(of: HNItemLocalizable?.self,
-                                      returning: [HNItemLocalizable].self, body: { group in
-            var comments: [HNItemLocalizable] = []
-            for commentID in story.item.kids ?? [] {
-                group.addTask {
-                    if useCache {
-                        if let cachedComment = await miniCache.item(for: commentID) {
-                            return cachedComment
-                        }
-                    }
-                    do {
-                        let jsonURL = "\(apiEndpoint)/item/\(commentID).json"
-                        let commentItem = try await AF.request(jsonURL, method: .get)
-                            .serializingDecodable(HNItem.self,
-                                                  decoder: JSONDecoder()).value
-                        var newLocalizableItem = HNItemLocalizable(item: commentItem)
-                        if let textDeformatted = newLocalizableItem.textDeformatted() {
-                            newLocalizableItem.textLocalized = try await translator
-                                .translate(textDeformatted)
-                        } else {
-                            newLocalizableItem.textLocalized = try await translator
-                                .translate(commentItem.text ?? "")
-                        }
-                        return newLocalizableItem
-                    } catch {
-                        return nil
-                    }
-                }
-            }
-            for await result in group {
-                if let result = result {
-                    comments.append(result)
-                }
-            }
-            return comments
-        })
-        miniCache.cache(newItems: comments)
+        comments = await stories.fetchComments(ids: story.item.kids ?? [],
+                                               translator: translator) {
+            // TODO: Report progress to view
+        }
+        stories.saveCache()
     }
 }
