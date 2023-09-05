@@ -125,9 +125,10 @@ struct StoriesView: View {
         let idsToFetch = Array(storyIDs[currentStartingIndex..<lastPageToFetch])
         setOverlay("記事内容を読み込み中…", .progress, 0, idsToFetch.count)
         displayedStories = await stories.fetchStories(ids: idsToFetch,
-                                                translator: translator, storyFetchedAction: {
+                                                      translator: translator,
+                                                      fetchFreshStory: !useCache) {
             overlayCurrent += 1
-        })
+        }
     }
 
     func downloadTranslationModel() async throws {
@@ -170,23 +171,25 @@ struct StoriesView: View {
     @ViewBuilder
     func storyList() -> some View {
         ScrollViewReader { scrollView in
-            List($displayedStories, rowContent: { $story in
-                if story.item.url != nil {
-                    Button {
-                        selectedStory = story
-                    } label: {
-                        HStack {
+            List {
+                ForEach($displayedStories) { $story in
+                    if story.item.url != nil {
+                        Button {
+                            selectedStory = story
+                        } label: {
+                            HStack {
+                                StoryItemRow(story: $story)
+                                Spacer()
+                            }
+                        }
+                        .contentShape(Rectangle())
+                    } else {
+                        NavigationLink(value: story) {
                             StoryItemRow(story: $story)
-                            Spacer()
                         }
                     }
-                    .contentShape(Rectangle())
-                } else {
-                    NavigationLink(value: story) {
-                        StoryItemRow(story: $story)
-                    }
                 }
-            })
+            }
             .listStyle(.plain)
             .navigationDestination(for: HNItemLocalizable.self, destination: { story in
                 StoryView(story: story)

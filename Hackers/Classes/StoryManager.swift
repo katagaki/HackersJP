@@ -32,14 +32,18 @@ class StoryManager: ObservableObject {
         do {
             if let data = defaults.data(forKey: "MiniCache") {
                 cache = try decoder.decode([Int: HNItemLocalizable].self, from: data)
+                cacheInMemory = data
+                debugPrint("\(cache.count) item(s) loaded from cache.")
             }
         } catch {
             debugPrint(error.localizedDescription)
+            defaults.set(nil, forKey: "MiniCache")
         }
     }
 
     func fetchStories(ids: [Int],
                       translator: Translator,
+                      fetchFreshStory: Bool = false,
                       storyFetchedAction: @escaping () -> Void) async -> [HNItemLocalizable] {
         let fetchedStories = await withTaskGroup(of: HNItemLocalizable?.self,
                                       returning: [HNItemLocalizable].self, body: { group in
@@ -47,7 +51,9 @@ class StoryManager: ObservableObject {
             for id in ids {
                 group.addTask(priority: .high) {
                     do {
-                        return try await self.story(id: id, translator: translator)
+                        return try await self.story(id: id,
+                                                    translator: translator,
+                                                    fetchFreshStory: fetchFreshStory)
                     } catch {
                         debugPrint(error.localizedDescription)
                         return nil
@@ -127,13 +133,15 @@ class StoryManager: ObservableObject {
                 debugPrint(error.localizedDescription)
             }
         }
-        cache[id] = newLocalizableItem
+        newLocalizableItem.cacheDate = Date()
+        cache(newItem: newLocalizableItem)
         return newLocalizableItem
     }
     // swiftlint:enable function_body_length
 
     func fetchComments(ids: [Int],
                        translator: Translator,
+                       fetchFreshComment: Bool = false,
                        commentFetchedAction: @escaping () -> Void) async -> [HNItemLocalizable] {
         let fetchedComments = await withTaskGroup(of: HNItemLocalizable?.self,
                                       returning: [HNItemLocalizable].self, body: { group in
@@ -141,7 +149,9 @@ class StoryManager: ObservableObject {
             for id in ids {
                 group.addTask(priority: .high) {
                     do {
-                        return try await self.comment(id: id, translator: translator)
+                        return try await self.comment(id: id,
+                                                      translator: translator,
+                                                      fetchFreshComment: fetchFreshComment)
                     } catch {
                         debugPrint(error.localizedDescription)
                         return nil
@@ -187,7 +197,8 @@ class StoryManager: ObservableObject {
             newLocalizableItem.textLocalized = try await translator
                 .translate(commentItem.text ?? "")
         }
-        cache[id] = newLocalizableItem
+        newLocalizableItem.cacheDate = Date()
+        cache(newItem: newLocalizableItem)
         return newLocalizableItem
     }
 
@@ -204,19 +215,18 @@ class StoryManager: ObservableObject {
                 cache[newItem.item.id] = newItemWithCacheDate
             }
         }
-        saveCache()
     }
 
     func cache(newItem: HNItemLocalizable) {
         debugPrint("[\(newItem.item.id)] Caching...")
         DispatchQueue.main.async { [self] in
             cache[newItem.item.id] = newItem
-            saveCache()
         }
     }
 
     func saveCache() {
         do {
+            debugPrint("Saving cache...")
             let encoded = try encoder.encode(cache)
             defaults.set(encoded, forKey: "MiniCache")
             DispatchQueue.main.async {
@@ -237,9 +247,11 @@ class StoryManager: ObservableObject {
         for (key, value) in cache {
             if let cacheDate = value.cacheDate {
                 if Calendar.current.dateComponents([.day], from: cacheDate, to: now).day ?? 0 >= 7 {
+                    debugPrint("[\(key)] Removing from cache...")
                     cache[key] = nil
                 }
             } else {
+                debugPrint("[\(key)] Removing from cache...")
                 cache[key] = nil
             }
         }
