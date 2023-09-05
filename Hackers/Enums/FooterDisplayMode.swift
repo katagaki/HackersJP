@@ -1,5 +1,5 @@
 //
-//  OverlayMode.swift
+//  FooterDisplayMode.swift
 //  Hackers
 //
 //  Created by シンジャスティン on 2023/08/28.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum OverlayMode {
+enum FooterDisplayMode {
     case progress
     case error
 }

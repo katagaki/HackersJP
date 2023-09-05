@@ -25,42 +25,18 @@ struct StoriesView: View {
     @State var storyIDs: [Int] = []
     @State var displayedStories: [HNItemLocalizable] = []
     @State var selectedStory: HNItemLocalizable?
-    @State var isOverlayShowing: Bool = false
-    @State var overlayMode: OverlayMode = .progress
-    @State var overlayText: String = "準備中…"
-    @State var overlayCurrent: Int = 0
-    @State var overlayTotal: Int = 0
+    @State var footerMode: FooterDisplayMode = .progress
+    @State var footerText: String = "準備中…"
+    @State var footerCurrent: Int = 0
+    @State var footerTotal: Int = 0
     @State var currentPage: Int = 0
 
     var body: some View {
         navigationStack()
             .task {
                 if state == .initialized {
-                    do {
-                        state = .loadingInitialData
-                        isOverlayShowing = true
-                        try await downloadTranslationModel()
-                        try await refreshStoryIDs()
-                        await refreshStories(forPage: currentPage)
-                        isOverlayShowing = false
-                        state = .readyForInteraction
-                    } catch {
-                        overlayMode = .error
-                        overlayText = error.localizedDescription
-                        state = .initialized
-                    }
+                    await refreshAll()
                 }
-            }
-            .overlay {
-                ZStack {
-                    if isOverlayShowing {
-                        Overlay(overlayMode: $overlayMode,
-                                overlayText: $overlayText,
-                                overlayCurrent: $overlayCurrent,
-                                overlayTotal: $overlayTotal)
-                    }
-                }
-                .animation(.default.speed(1.5), value: isOverlayShowing)
             }
             .sheet(item: $selectedStory, onDismiss: {
                 selectedStory = nil
@@ -75,73 +51,72 @@ struct StoriesView: View {
             })
             .onChange(of: settings.feedSort, perform: { _ in
                 Task {
-                    isOverlayShowing = true
                     if type == .top || type == .new || type == .best {
                         type = settings.feedSort
-                        await refreshStories(forPage: 0)
-                        currentPage = 0
+                        await refreshAll()
                     }
-                    isOverlayShowing = false
                 }
             })
             .onChange(of: settings.pageStoryCount, perform: { _ in
                 Task {
-                    isOverlayShowing = true
-                    await refreshStories(forPage: 0)
-                    currentPage = 0
-                    isOverlayShowing = false
+                    await refreshAll()
                 }
             })
     }
 
-    func refreshAll() async {
-        if state == .readyForInteraction {
-            do {
-                state = .loadingInitialData
-                try await refreshStoryIDs()
-                await refreshStories(forPage: 0, useCache: false)
-                currentPage = 0
-                state = .readyForInteraction
-            } catch {
-                overlayMode = .error
-                overlayText = error.localizedDescription
-                state = .initialized
-            }
+    func refreshAll(usingCache useCache: Bool = true) async {
+        do {
+            state = .loadingInitialData
+            displayedStories.removeAll()
+            try await refreshStoryIDs()
+            currentPage = 0
+            await refreshStories(forPage: currentPage, useCache: useCache)
+            state = .readyForInteraction
+        } catch {
+            footerMode = .error
+            footerText = error.localizedDescription
+            state = .initialized
         }
     }
 
     func refreshStoryIDs() async throws {
-        setOverlay("記事を読み込み中…", .progress, 0, 1)
+        setFooter("記事を読み込み中…", .progress, 0, 1)
         let jsonURL = "\(apiEndpoint)/\(type.getConfig().jsonName).json"
         storyIDs = try await AF.request(jsonURL, method: .get)
             .serializingDecodable([Int].self,
                                   decoder: JSONDecoder()).value
-        setOverlay("記事を読み込み中…", .progress, 1, 1)
+        setFooter("記事を読み込み中…", .progress, 1, 1)
     }
 
     func refreshStories(forPage page: Int, useCache: Bool = true) async {
         let currentStartingIndex = page * settings.pageStoryCount
         let lastPageToFetch = min(storyIDs.count, currentStartingIndex + settings.pageStoryCount)
+        debugPrint("Loading stories from index \(currentStartingIndex) to \(lastPageToFetch)...")
         let idsToFetch = Array(storyIDs[currentStartingIndex..<lastPageToFetch])
-        setOverlay("記事内容を読み込み中…", .progress, 0, idsToFetch.count)
-        displayedStories = await stories.fetchStories(ids: idsToFetch,
-                                                      translator: translator,
-                                                      fetchFreshStory: !useCache) {
-            overlayCurrent += 1
+        setFooter("記事内容を読み込み中…", .progress, 0, idsToFetch.count)
+        let newlyFetchedStories = await stories.fetchStories(ids: idsToFetch,
+                                                             translator: translator,
+                                                             fetchFreshStory: !useCache) {
+            footerCurrent += 1
         }
+        displayedStories.append(contentsOf: newlyFetchedStories)
     }
 
     func downloadTranslationModel() async throws {
-        setOverlay("翻訳用リソースをダウンロード中…", .progress, 0, 1)
+        setFooter("翻訳用リソースをダウンロード中…", .progress, 0, 1)
         try await translator.downloadModelIfNeeded()
-        setOverlay("翻訳用リソースをダウンロード中…", .progress, 1, 1)
+        setFooter("翻訳用リソースをダウンロード中…", .progress, 1, 1)
     }
 
-    func setOverlay(_ text: String, _ mode: OverlayMode, _ current: Int, _ total: Int) {
-        overlayMode = mode
-        overlayText = text
-        overlayCurrent = current
-        overlayTotal = total
+    func setFooter(_ text: String, _ mode: FooterDisplayMode, _ current: Int, _ total: Int) {
+        footerMode = mode
+        footerText = text
+        footerCurrent = current
+        footerTotal = total
+    }
+
+    func totalNumberOfPages() -> Int {
+        return Int(ceil(Double(storyIDs.count) / Double(settings.pageStoryCount)))
     }
 
     @ViewBuilder
@@ -170,10 +145,9 @@ struct StoriesView: View {
 
     @ViewBuilder
     func storyList() -> some View {
-        ScrollViewReader { scrollView in
-            List {
-                ForEach($displayedStories) { $story in
-                    if story.item.url != nil {
+        List {
+            ForEach($displayedStories) { $story in
+                if type == .job, story.item.url != nil {
                         Button {
                             selectedStory = story
                         } label: {
@@ -183,61 +157,44 @@ struct StoriesView: View {
                             }
                         }
                         .contentShape(Rectangle())
-                    } else {
-                        NavigationLink(value: story) {
-                            StoryItemRow(story: $story)
-                        }
+                } else {
+                    NavigationLink(value: story) {
+                        StoryItemRow(story: $story)
                     }
                 }
             }
-            .listStyle(.plain)
-            .navigationDestination(for: HNItemLocalizable.self, destination: { story in
-                StoryView(story: story)
-            })
-            .refreshable {
-                await refreshAll()
-            }
-            .safeAreaInset(edge: .bottom, alignment: .center) {
-                paginator()
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    if settings.titleLanguage == 0 {
-                        Image("TranslateBanner")
+            if storyIDs.count == 0 || currentPage < totalNumberOfPages() - 1 {
+                ListFooter(footerMode: $footerMode,
+                           footerText: $footerText,
+                           footerCurrent: $footerCurrent,
+                           footerTotal: $footerTotal)
+                .listRowSeparator(.hidden)
+                .task {
+                    if storyIDs.count > 0 && state == .readyForInteraction && currentPage < totalNumberOfPages() - 1 {
+                        state = .loadingIntermediaryData
+                        currentPage += 1
+                        await refreshStories(forPage: currentPage)
+                        state = .readyForInteraction
                     }
                 }
             }
-            .onChange(of: currentPage) { _ in
-                if let firstStory = displayedStories.first {
-                    scrollView.scrollTo(firstStory.id)
+        }
+        .listStyle(.plain)
+        .navigationDestination(for: HNItemLocalizable.self, destination: { story in
+            StoryView(story: story)
+        })
+        .refreshable {
+            if state == .readyForInteraction {
+                await refreshAll(usingCache: false)
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                if settings.titleLanguage == 0 {
+                    Image("TranslateBanner")
                 }
             }
         }
         .navigationTitle(type.getConfig().viewTitle)
-    }
-
-    @ViewBuilder
-    func paginator() -> some View {
-        Paginator(currentPage: $currentPage,
-                  totalPages: .constant((Int(ceil(Double(storyIDs.count) /
-                                                  Double(settings.pageStoryCount)))))) {
-            Task {
-                isOverlayShowing = true
-                await refreshStories(forPage: currentPage - 1)
-                currentPage -= 1
-                isOverlayShowing = false
-            }
-        } nextAction: {
-            Task {
-                isOverlayShowing = true
-                await refreshStories(forPage: currentPage + 1)
-                currentPage += 1
-                isOverlayShowing = false
-            }
-        }
-        .disabled(isOverlayShowing)
-        .background(.regularMaterial,
-                    in: RoundedRectangle(cornerRadius: 99, style: .continuous))
-        .padding()
     }
 }

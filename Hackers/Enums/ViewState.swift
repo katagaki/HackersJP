@@ -11,6 +11,7 @@ enum ViewState {
     case initialized
     case loadingInitialData
     case readyForInteraction
+    case loadingIntermediaryData
     case readyForPresentation
     case resetting
 }

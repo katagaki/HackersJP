@@ -21,7 +21,9 @@ struct StoryView: View {
     @State var state: ViewState = .initialized
     @State var story: HNItemLocalizable
     @State var comments: [HNItemLocalizable] = []
-    @State var progressText: String = "準備中…"
+    @State var footerMode: FooterDisplayMode = .progress
+    @State var footerCurrent: Int = 0
+    @State var footerTotal: Int = 0
     @State var isSafariViewControllerPresenting: Bool = false
 
     var body: some View {
@@ -101,25 +103,22 @@ struct StoryView: View {
             }
             .padding([.top, .bottom], 8.0)
             .listRowInsets(EdgeInsets())
-            if progressText == "" {
+            if state == .readyForInteraction {
                 ForEach(comments, id: \.id) { comment in
                     CommentItemRow(comment: comment)
                 }
             } else {
-                HStack(alignment: .center, spacing: 8) {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                    Text(progressText)
-                }
+                ListFooter(footerMode: $footerMode,
+                           footerText: .constant("コメントを読み込み中…"),
+                           footerCurrent: $footerCurrent,
+                           footerTotal: $footerTotal)
             }
         }
         .listStyle(.plain)
         .task {
             if state == .initialized {
                 state = .loadingInitialData
-                progressText = "コメントを読み込み中…"
                 await refreshComments()
-                progressText = ""
                 state = .readyForInteraction
             }
         }
@@ -147,10 +146,12 @@ struct StoryView: View {
     }
 
     func refreshComments(useCache: Bool = true) async {
-        comments = await stories.fetchComments(ids: story.item.kids ?? [],
-                                               translator: translator) {
-            // TODO: Report progress to view
+        if let commentItems = story.item.kids {
+            footerTotal = commentItems.count
+            comments = await stories.fetchComments(ids: commentItems,
+                                                   translator: translator) {
+                footerCurrent += 1
+            }
         }
-        stories.saveCache()
     }
 }
