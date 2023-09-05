@@ -109,7 +109,7 @@ struct StoryView: View {
                 }
             } else {
                 ListFooter(footerMode: $footerMode,
-                           footerText: .constant("コメントを読み込み中…"),
+                           footerText: .constant(NSLocalizedString("コメントを読み込み中…", comment: "")),
                            footerCurrent: $footerCurrent,
                            footerTotal: $footerTotal)
                 .listRowSeparator(.hidden)

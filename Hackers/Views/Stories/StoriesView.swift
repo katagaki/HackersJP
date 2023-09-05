@@ -26,7 +26,7 @@ struct StoriesView: View {
     @State var displayedStories: [HNItemLocalizable] = []
     @State var selectedStory: HNItemLocalizable?
     @State var footerMode: FooterDisplayMode = .progress
-    @State var footerText: String = "準備中…"
+    @State var footerText: String = NSLocalizedString("準備中…", comment: "")
     @State var footerCurrent: Int = 0
     @State var footerTotal: Int = 0
     @State var currentPage: Int = 0
@@ -117,7 +117,7 @@ struct StoriesView: View {
 
     func setFooter(_ text: String, _ mode: FooterDisplayMode, _ current: Int, _ total: Int) {
         footerMode = mode
-        footerText = text
+        footerText = NSLocalizedString(text, comment: "")
         footerCurrent = current
         footerTotal = total
     }

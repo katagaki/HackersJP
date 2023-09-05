@@ -18,19 +18,19 @@ enum HNStoryType: Int, Codable {
         switch self {
         case .top:
             return HNStoryConfiguration(jsonName: "topstories",
-                                        viewTitle: "フィード")
+                                        viewTitle: NSLocalizedString("フィード", comment: ""))
         case .new:
             return HNStoryConfiguration(jsonName: "newstories",
-                                        viewTitle: "フィード")
+                                        viewTitle: NSLocalizedString("フィード", comment: ""))
         case .best:
             return HNStoryConfiguration(jsonName: "beststories",
-                                        viewTitle: "フィード")
+                                        viewTitle: NSLocalizedString("フィード", comment: ""))
         case .show:
             return HNStoryConfiguration(jsonName: "showstories",
-                                        viewTitle: "展示")
+                                        viewTitle: NSLocalizedString("展示", comment: ""))
         case .job:
             return HNStoryConfiguration(jsonName: "jobstories",
-                                        viewTitle: "求人")
+                                        viewTitle: NSLocalizedString("求人", comment: ""))
         }
     }
 }
