@@ -162,6 +162,9 @@ struct MoreView: View {
             .onChange(of: settings.titleLanguage, perform: { value in
                 settings.setTitleLanguage(value)
             })
+            .onChange(of: settings.commentLanguage, perform: { value in
+                settings.setCommentLanguage(value)
+            })
             .onChange(of: settings.linkLanguage, perform: { value in
                 settings.setLinkLanguage(value)
             })
