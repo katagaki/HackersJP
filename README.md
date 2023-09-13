@@ -4,7 +4,7 @@
 
 A Hacker News app for Japanese readers.
 
-**Download: [TestFlight](https://testflight.apple.com/join/wNgIKzEh)**
+**Download: [App Store](https://apps.apple.com/app/id6463075798)**
 
 ## Development
 
