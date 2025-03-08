@@ -12,7 +12,7 @@ echo "Installing CocoaPods."
 brew install cocoapods
 
 echo "Installing pods."
-cd $CI_WORKSPACE/
+cd $CI_PRIMARY_REPOSITORY_PATH/
 pod install
 
 echo "Post-clone script completed."
