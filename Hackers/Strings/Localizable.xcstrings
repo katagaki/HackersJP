@@ -397,6 +397,7 @@
       }
     },
     "著者権表記" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

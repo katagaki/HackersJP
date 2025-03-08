@@ -5,6 +5,7 @@
 //  Created by シンジャスティン on 2023/08/23.
 //
 
+import Komponents
 import SwiftUI
 
 struct MoreView: View {
@@ -14,7 +15,7 @@ struct MoreView: View {
 
     var body: some View {
         NavigationStack(path: $navigationManager.moreTabPath) {
-            List {
+            MoreList(repoName: "katagaki/HackersJP", viewPath: ViewPath.moreAttributions) {
                 Section {
                     Picker(selection: $settings.startupTab) {
                         Text("フィード")
@@ -97,77 +98,153 @@ struct MoreView: View {
                     ListSectionHeader(text: "言語")
                         .font(.body)
                 }
-                Section {
-                    Link(destination: URL(string: "https://x.com/katagaki_")!) {
-                        HStack {
-                            ListRow(image: "ListIcon.Twitter",
-                                    title: "Xでポスト",
-                                    subtitle: "@katagaki_",
-                                    includeSpacer: true)
-                            Image(systemName: "safari")
-                                .opacity(0.5)
-                        }
-                        .foregroundColor(.primary)
-                    }
-                    Link(destination: URL(string: "mailto:ktgk.public@icloud.com")!) {
-                        HStack {
-                            ListRow(image: "ListIcon.Email",
-                                    title: "メールを送信",
-                                    subtitle: "ktgk.public@icloud.com",
-                                    includeSpacer: true)
-                            Image(systemName: "arrow.up.forward.app")
-                                .opacity(0.5)
-                        }
-                        .foregroundColor(.primary)
-                    }
-                    Link(destination: URL(string: "https://github.com/katagaki/HackersJP")!) {
-                        HStack {
-                            ListRow(image: "ListIcon.GitHub",
-                                    title: "ソースコードを閲覧",
-                                    subtitle: "katagaki/HackersJP",
-                                    includeSpacer: true)
-                            Image(systemName: "safari")
-                                .opacity(0.5)
-                        }
-                        .foregroundColor(.primary)
-                    }
-                } header: {
-                    ListSectionHeader(text: "サポート")
-                        .font(.body)
-                }
-                Section {
-                    NavigationLink(value: ViewPath.moreAttributions) {
-                        ListRow(image: "ListIcon.Attributions",
-                                title: "著者権表記")
-                    }
-                }
             }
-            .listStyle(.insetGrouped)
             .navigationDestination(for: ViewPath.self, destination: { viewPath in
+                // swiftlint:disable line_length
                 switch viewPath {
                 case .moreCache: CacheView()
-                case .moreAttributions: LicensesView()
+                case .moreAttributions: LicensesView(licenses: [
+                    License(libraryName: "Alamofire", text:
+"""
+Copyright (c) 2014-2022 Alamofire Software Foundation (http://alamofire.org/)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+"""),
+                    License(libraryName: "FaviconFinder", text:
+"""
+Copyright (c) 2022 William Lumley <will@lumley.io>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+"""),
+                    License(libraryName: "ML Kit", text:
+"""
+THIS SERVICE MAY CONTAIN TRANSLATIONS POWERED BY GOOGLE. GOOGLE DISCLAIMS ALL WARRANTIES RELATED TO THE TRANSLATIONS, EXPRESS OR IMPLIED, INCLUDING ANY WARRANTIES OF ACCURACY, RELIABILITY, AND ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+"""),
+                    License(libraryName: "nanopb", text:
+"""
+Copyright (c) 2011 Petteri Aimonen <jpa at nanopb.mail.kapsi.fi>
+
+This software is provided 'as-is', without any express or
+implied warranty. In no event will the authors be held liable
+for any damages arising from the use of this software.
+
+Permission is granted to anyone to use this software for any
+purpose, including commercial applications, and to alter it and
+redistribute it freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you
+   must not claim that you wrote the original software. If you use
+   this software in a product, an acknowledgment in the product
+   documentation would be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and
+   must not be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+"""),
+                    License(libraryName: "SSZipArchive", text:
+"""
+Copyright (c) 2013-2021, ZipArchive, https://github.com/ZipArchive
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""),
+                    License(libraryName: "SwiftSoup", text:
+"""
+MIT License
+
+Copyright (c) 2016 Nabil Chatbi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+""")
+                ])
                 default: Color.clear
                 }
+                // swiftlint:enable line_length
             })
-            .onChange(of: settings.startupTab, perform: { value in
-                settings.setStartupTab(value)
-            })
-            .onChange(of: settings.feedSort, perform: { value in
-                settings.setFeedSort(value)
-            })
-            .onChange(of: settings.pageStoryCount, perform: { value in
-                settings.setPageStoryCount(value)
-            })
-            .onChange(of: settings.titleLanguage, perform: { value in
-                settings.setTitleLanguage(value)
-            })
-            .onChange(of: settings.commentLanguage, perform: { value in
-                settings.setCommentLanguage(value)
-            })
-            .onChange(of: settings.linkLanguage, perform: { value in
-                settings.setLinkLanguage(value)
-            })
+            .onChange(of: settings.startupTab) { _, newValue in
+                settings.setStartupTab(newValue)
+            }
+            .onChange(of: settings.feedSort) { _, newValue in
+                settings.setFeedSort(newValue)
+            }
+            .onChange(of: settings.pageStoryCount) { _, newValue in
+                settings.setPageStoryCount(newValue)
+            }
+            .onChange(of: settings.titleLanguage) { _, newValue in
+                settings.setTitleLanguage(newValue)
+            }
+            .onChange(of: settings.commentLanguage) { _, newValue in
+                settings.setCommentLanguage(newValue)
+            }
+            .onChange(of: settings.linkLanguage) { _, newValue in
+                settings.setLinkLanguage(newValue)
+            }
             .navigationTitle("その他")
         }
     }

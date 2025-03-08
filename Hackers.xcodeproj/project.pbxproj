@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		681D07F500846733B18A2A18 /* Pods_Hackers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7273C0718512D5967816A81D /* Pods_Hackers.framework */; };
 		E41D15332A95B00C008B686B /* StoryItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41D15322A95B00C008B686B /* StoryItemRow.swift */; };
-		E41D15352A95B7E4008B686B /* License.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41D15342A95B7E4008B686B /* License.swift */; };
 		E43C43932A9858B70011FE82 /* StoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43C43922A9858B70011FE82 /* StoryView.swift */; };
 		E43C43952A98617C0011FE82 /* HNItemLocalizable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43C43942A98617C0011FE82 /* HNItemLocalizable.swift */; };
 		E43C43982A9861A90011FE82 /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43C43972A9861A90011FE82 /* Global.swift */; };
@@ -20,7 +19,6 @@
 		E46652BA2A9463CB0048BA05 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46652B92A9463CB0048BA05 /* MainTabView.swift */; };
 		E46652BC2A9463CE0048BA05 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E46652BB2A9463CE0048BA05 /* Assets.xcassets */; };
 		E46652C72A94686B0048BA05 /* HNItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46652C62A94686B0048BA05 /* HNItem.swift */; };
-		E46652CC2A94690B0048BA05 /* LicensesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46652CB2A94690B0048BA05 /* LicensesView.swift */; };
 		E46652CE2A9473720048BA05 /* StoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46652CD2A9473720048BA05 /* StoriesView.swift */; };
 		E477E7202A95D55A00517B72 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = E477E71F2A95D55A00517B72 /* Alamofire */; };
 		E477E7222A95D7FD00517B72 /* SafariView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E477E7212A95D7FD00517B72 /* SafariView.swift */; };
@@ -34,6 +32,7 @@
 		E4876AE42A9EEFA700DC7FD9 /* TabType.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4876AE32A9EEFA700DC7FD9 /* TabType.swift */; };
 		E4876AE62A9EEFC500DC7FD9 /* ViewPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4876AE52A9EEFC500DC7FD9 /* ViewPath.swift */; };
 		E4876AE82A9EF02300DC7FD9 /* NavigationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4876AE72A9EF02300DC7FD9 /* NavigationManager.swift */; };
+		E4896D442D7BF20A00F9B22F /* Komponents in Frameworks */ = {isa = PBXBuildFile; productRef = E4896D432D7BF20A00F9B22F /* Komponents */; };
 		E48A02782A9A0DCA00C31F40 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E48A02772A9A0DCA00C31F40 /* LaunchScreen.storyboard */; };
 		E4DD4DF32AA749500090036E /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = E4DD4DF22AA749500090036E /* InfoPlist.xcstrings */; };
 		E4DD4DF52AA749840090036E /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = E4DD4DF42AA749840090036E /* Localizable.xcstrings */; };
@@ -47,7 +46,6 @@
 		7273C0718512D5967816A81D /* Pods_Hackers.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Hackers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		93B4830D178BC940CF1E1EBB /* Pods-Hackers.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Hackers.release.xcconfig"; path = "Target Support Files/Pods-Hackers/Pods-Hackers.release.xcconfig"; sourceTree = "<group>"; };
 		E41D15322A95B00C008B686B /* StoryItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryItemRow.swift; sourceTree = "<group>"; };
-		E41D15342A95B7E4008B686B /* License.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = License.swift; sourceTree = "<group>"; };
 		E43C43922A9858B70011FE82 /* StoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryView.swift; sourceTree = "<group>"; };
 		E43C43942A98617C0011FE82 /* HNItemLocalizable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HNItemLocalizable.swift; sourceTree = "<group>"; };
 		E43C43972A9861A90011FE82 /* Global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
@@ -60,7 +58,6 @@
 		E46652BB2A9463CE0048BA05 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E46652BD2A9463CE0048BA05 /* Hackers.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Hackers.entitlements; sourceTree = "<group>"; };
 		E46652C62A94686B0048BA05 /* HNItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HNItem.swift; sourceTree = "<group>"; };
-		E46652CB2A94690B0048BA05 /* LicensesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicensesView.swift; sourceTree = "<group>"; };
 		E46652CD2A9473720048BA05 /* StoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoriesView.swift; sourceTree = "<group>"; };
 		E46652D02A94FAB10048BA05 /* MLKitTranslate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MLKitTranslate.framework; path = Pods/MLKitTranslate/Frameworks/MLKitTranslate.framework; sourceTree = "<group>"; };
 		E46652D42A94FE280048BA05 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -87,6 +84,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E4896D442D7BF20A00F9B22F /* Komponents in Frameworks */,
 				E477E7252A95E33E00517B72 /* FaviconFinder in Frameworks */,
 				E477E7202A95D55A00517B72 /* Alamofire in Frameworks */,
 				681D07F500846733B18A2A18 /* Pods_Hackers.framework in Frameworks */,
@@ -110,7 +108,6 @@
 			children = (
 				E46652C62A94686B0048BA05 /* HNItem.swift */,
 				E43C43942A98617C0011FE82 /* HNItemLocalizable.swift */,
-				E41D15342A95B7E4008B686B /* License.swift */,
 			);
 			path = Structs;
 			sourceTree = "<group>";
@@ -227,7 +224,6 @@
 			children = (
 				E477E7292A95F90700517B72 /* MoreView.swift */,
 				E43C439B2A9872DC0011FE82 /* CacheView.swift */,
-				E46652CB2A94690B0048BA05 /* LicensesView.swift */,
 			);
 			path = More;
 			sourceTree = "<group>";
@@ -266,6 +262,7 @@
 			packageProductDependencies = (
 				E477E71F2A95D55A00517B72 /* Alamofire */,
 				E477E7242A95E33E00517B72 /* FaviconFinder */,
+				E4896D432D7BF20A00F9B22F /* Komponents */,
 			);
 			productName = Hackers;
 			productReference = E46652B42A9463CB0048BA05 /* Hackers.app */;
@@ -279,7 +276,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 1620;
 				TargetAttributes = {
 					E46652B32A9463CB0048BA05 = {
 						CreatedOnToolsVersion = 15.0;
@@ -299,6 +296,7 @@
 			packageReferences = (
 				E477E71E2A95D55900517B72 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				E477E7232A95E33E00517B72 /* XCRemoteSwiftPackageReference "FaviconFinder" */,
+				E4896D422D7BF20A00F9B22F /* XCRemoteSwiftPackageReference "Komponents" */,
 			);
 			productRefGroup = E46652B52A9463CB0048BA05 /* Products */;
 			projectDirPath = "";
@@ -409,7 +407,6 @@
 				E47FC65E2A97BBB1006BBCF9 /* SettingsManager.swift in Sources */,
 				E43C43A02A98ED9B0011FE82 /* ViewState.swift in Sources */,
 				E46652BA2A9463CB0048BA05 /* MainTabView.swift in Sources */,
-				E41D15352A95B7E4008B686B /* License.swift in Sources */,
 				E46652CE2A9473720048BA05 /* StoriesView.swift in Sources */,
 				E46652C72A94686B0048BA05 /* HNItem.swift in Sources */,
 				E4876AE62A9EEFC500DC7FD9 /* ViewPath.swift in Sources */,
@@ -420,7 +417,6 @@
 				E4EB91DF2A9CE70100C0C93C /* FooterDisplayMode.swift in Sources */,
 				E41D15332A95B00C008B686B /* StoryItemRow.swift in Sources */,
 				E43C43982A9861A90011FE82 /* Global.swift in Sources */,
-				E46652CC2A94690B0048BA05 /* LicensesView.swift in Sources */,
 				E4876AE22A9EEF9500DC7FD9 /* TabManager.swift in Sources */,
 				E477E7282A95F0EC00517B72 /* HNStoryType.swift in Sources */,
 				E4EB91D92A9CB42F00C0C93C /* StoryManager.swift in Sources */,
@@ -442,6 +438,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -504,6 +501,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -561,7 +559,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Hackers/Hackers.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = YYM4Z6MU8F;
 				ENABLE_PREVIEWS = YES;
@@ -583,11 +581,11 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tsubuzaki.Hackers;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -606,7 +604,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Hackers/Hackers.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = YYM4Z6MU8F;
 				ENABLE_PREVIEWS = YES;
@@ -628,11 +626,11 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tsubuzaki.Hackers;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -683,6 +681,14 @@
 				minimumVersion = 4.2.0;
 			};
 		};
+		E4896D422D7BF20A00F9B22F /* XCRemoteSwiftPackageReference "Komponents" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/katagaki/Komponents";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -695,6 +701,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E477E7232A95E33E00517B72 /* XCRemoteSwiftPackageReference "FaviconFinder" */;
 			productName = FaviconFinder;
+		};
+		E4896D432D7BF20A00F9B22F /* Komponents */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E4896D422D7BF20A00F9B22F /* XCRemoteSwiftPackageReference "Komponents" */;
+			productName = Komponents;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

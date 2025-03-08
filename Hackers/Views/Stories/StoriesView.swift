@@ -56,19 +56,19 @@ struct StoriesView: View {
                         .ignoresSafeArea()
                 }
             })
-            .onChange(of: settings.feedSort, perform: { _ in
+            .onChange(of: settings.feedSort) { _, _ in
                 Task {
                     if type == .top || type == .new || type == .best {
                         type = settings.feedSort
                         await refreshAll()
                     }
                 }
-            })
-            .onChange(of: settings.pageStoryCount, perform: { _ in
+            }
+            .onChange(of: settings.pageStoryCount) { _, _ in
                 Task {
                     await refreshAll()
                 }
-            })
+            }
     }
 
     func refreshAll(usingCache useCache: Bool = true) async {
