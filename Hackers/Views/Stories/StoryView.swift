@@ -127,9 +127,18 @@ struct StoryView: View {
             await refreshComments(useCache: false)
         }
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                if settings.titleLanguage == 0 || settings.commentLanguage == 0 {
-                    Image("TranslateBanner")
+            if #available(iOS 26.0, *) {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if settings.titleLanguage == 0 || settings.commentLanguage == 0 {
+                        Image("TranslateBanner")
+                    }
+                }
+                .sharedBackgroundVisibility(.hidden)
+            } else {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if settings.titleLanguage == 0 || settings.commentLanguage == 0 {
+                        Image("TranslateBanner")
+                    }
                 }
             }
         }

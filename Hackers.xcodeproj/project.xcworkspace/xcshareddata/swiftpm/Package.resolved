@@ -1,4 +1,5 @@
 {
+  "originHash" : "c1abe06ef9bca6b6ec6f49b636c290ebddbc4244786e5e85cd0f331ce4e65243",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -19,6 +20,15 @@
       }
     },
     {
+      "identity" : "komponents",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/katagaki/Komponents",
+      "state" : {
+        "branch" : "main",
+        "revision" : "ac1ef7aefb1c4b5a0af65251cb8f14dd42bd1eb6"
+      }
+    },
+    {
       "identity" : "swiftsoup",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/scinfu/SwiftSoup.git",
@@ -28,5 +38,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

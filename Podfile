@@ -2,7 +2,7 @@ platform :ios, '16.0'
 use_frameworks!
 
 target 'Hackers' do
-  pod 'GoogleMLKit/Translate', '3.2.0'
+  pod 'GoogleMLKit/Translate', '8.0.0'
 end
 
 post_install do |installer|
