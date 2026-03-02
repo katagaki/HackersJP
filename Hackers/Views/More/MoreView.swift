@@ -25,11 +25,11 @@ struct MoreView: View {
                         Text("展示")
                             .tag(2)
                     } label: {
-                        ListRow(image: "ListIcon.Startup",
+                        ListRow(image: "house",
                                 title: "デフォルトタブ")
                     }
                     NavigationLink(value: ViewPath.moreCache) {
-                        ListRow(image: "ListIcon.Cache",
+                        ListRow(image: "internaldrive",
                                 title: "キャッシュ管理")
                     }
                 } header: {
@@ -45,7 +45,7 @@ struct MoreView: View {
                         Text("ベスト")
                             .tag(HNStoryType.best)
                     } label: {
-                        ListRow(image: "ListIcon.Sort",
+                        ListRow(image: "arrow.up.arrow.down",
                                 title: "並べ替え")
                     }
                     Picker(selection: $settings.pageStoryCount) {
@@ -56,7 +56,7 @@ struct MoreView: View {
                         Text("30件")
                             .tag(30)
                     } label: {
-                        ListRow(image: "ListIcon.PageStoryCount",
+                        ListRow(image: "list.number",
                                 title: "ページの記事数")
                     }
                 } header: {
@@ -64,13 +64,25 @@ struct MoreView: View {
                         .font(.body)
                 }
                 Section {
+                    Picker(selection: $settings.translationService) {
+                        Text("Google翻訳")
+                            .tag(0)
+                        Text("Apple翻訳")
+                            .tag(1)
+                    } label: {
+                        ListRow(image: "translate",
+                                title: "翻訳サービス",
+                                subtitle: settings.translationService == 0 ?
+                                    "Google ML Kitで翻訳されます。" :
+                                    "Appleの翻訳で翻訳されます。")
+                    }
                     Picker(selection: $settings.titleLanguage) {
                         Text("日本語")
                             .tag(0)
                         Text("英語")
                             .tag(1)
                     } label: {
-                        ListRow(image: "ListIcon.Language.Title",
+                        ListRow(image: "textformat",
                                 title: "タイトルおよび内容",
                                 subtitle: settings.titleLanguage == 0 ? "オフラインで翻訳されます。" : "英語の原文で表示されます。")
                     }
@@ -80,7 +92,7 @@ struct MoreView: View {
                         Text("英語")
                             .tag(1)
                     } label: {
-                        ListRow(image: "ListIcon.Language.Comment",
+                        ListRow(image: "text.bubble",
                                 title: "コメント",
                                 subtitle: settings.commentLanguage == 0 ? "オフラインで翻訳されます。" : "英語の原文で表示されます。")
                     }
@@ -90,7 +102,7 @@ struct MoreView: View {
                         Text("英語")
                             .tag(1)
                     } label: {
-                        ListRow(image: "ListIcon.Language.Article",
+                        ListRow(image: "newspaper",
                                 title: "記事",
                                 subtitle: settings.linkLanguage == 0 ? "翻訳されたページを開きます。" : "元の記事を開きます。")
                     }
@@ -244,6 +256,9 @@ SOFTWARE.
             }
             .onChange(of: settings.linkLanguage) { _, newValue in
                 settings.setLinkLanguage(newValue)
+            }
+            .onChange(of: settings.translationService) { _, newValue in
+                settings.setTranslationService(newValue)
             }
             .navigationTitle("その他")
         }

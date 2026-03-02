@@ -9,6 +9,9 @@ import Alamofire
 import FaviconFinder
 import Foundation
 import MLKitTranslate
+#if canImport(Translation)
+import Translation
+#endif
 
 class StoryManager: ObservableObject {
 
@@ -43,6 +46,7 @@ class StoryManager: ObservableObject {
 
     func fetchStories(ids: [Int],
                       translator: Translator,
+                      translationService: Int = 0,
                       fetchFreshStory: Bool = false,
                       storyFetchedAction: @escaping () -> Void) async -> [HNItemLocalizable] {
         let fetchedStories = await withTaskGroup(of: HNItemLocalizable?.self,
@@ -53,6 +57,7 @@ class StoryManager: ObservableObject {
                     do {
                         return try await self.story(id: id,
                                                     translator: translator,
+                                                    translationService: translationService,
                                                     fetchFreshStory: fetchFreshStory)
                     } catch {
                         debugPrint(error.localizedDescription)
@@ -81,6 +86,7 @@ class StoryManager: ObservableObject {
     // swiftlint:disable function_body_length
     func story(id: Int,
                translator: Translator,
+               translationService: Int = 0,
                fetchFreshStory: Bool = false) async throws -> HNItemLocalizable {
         debugPrint("[\(id)] Attempting to get story from cache...")
         if !fetchFreshStory,
@@ -99,20 +105,28 @@ class StoryManager: ObservableObject {
             if title.starts(with: "Show HN: ") {
                 newLocalizableItem.isShowHNStory = true
                 newLocalizableItem.item.title = title.replacingOccurrences(of: "Show HN: ", with: "")
-                newLocalizableItem.titleLocalized = try await translator
-                    .translate(title.replacingOccurrences(of: "Show HN: ", with: ""))
+                newLocalizableItem.titleLocalized = try await translateText(
+                    title.replacingOccurrences(of: "Show HN: ", with: ""),
+                    translator: translator,
+                    translationService: translationService)
             } else {
-                newLocalizableItem.titleLocalized = try await translator
-                    .translate(title)
+                newLocalizableItem.titleLocalized = try await translateText(
+                    title,
+                    translator: translator,
+                    translationService: translationService)
             }
         }
         debugPrint("[\(id)] Localizing text...")
         if let textDeformatted = newLocalizableItem.textDeformatted() {
-            newLocalizableItem.textLocalized = try await translator
-                .translate(textDeformatted)
+            newLocalizableItem.textLocalized = try await translateText(
+                textDeformatted,
+                translator: translator,
+                translationService: translationService)
         } else {
-            newLocalizableItem.textLocalized = try await translator
-                .translate(storyItem.text ?? "")
+            newLocalizableItem.textLocalized = try await translateText(
+                storyItem.text ?? "",
+                translator: translator,
+                translationService: translationService)
         }
         debugPrint("[\(id)] Getting favicon...")
         if let url = storyItem.url {
@@ -141,6 +155,7 @@ class StoryManager: ObservableObject {
 
     func fetchComments(ids: [Int],
                        translator: Translator,
+                       translationService: Int = 0,
                        fetchFreshComment: Bool = false,
                        commentFetchedAction: @escaping () -> Void) async -> [HNItemLocalizable] {
         let fetchedComments = await withTaskGroup(of: HNItemLocalizable?.self,
@@ -151,6 +166,7 @@ class StoryManager: ObservableObject {
                     do {
                         return try await self.comment(id: id,
                                                       translator: translator,
+                                                      translationService: translationService,
                                                       fetchFreshComment: fetchFreshComment)
                     } catch {
                         debugPrint(error.localizedDescription)
@@ -176,7 +192,10 @@ class StoryManager: ObservableObject {
         return correctlyOrderedComments
     }
 
-    func comment(id: Int, translator: Translator, fetchFreshComment: Bool = false) async throws -> HNItemLocalizable {
+    func comment(id: Int,
+                 translator: Translator,
+                 translationService: Int = 0,
+                 fetchFreshComment: Bool = false) async throws -> HNItemLocalizable {
         debugPrint("[\(id)] Attempting to get comment from cache...")
         if !fetchFreshComment,
            let loadedComment = cache[id] {
@@ -191,16 +210,103 @@ class StoryManager: ObservableObject {
         var newLocalizableItem = HNItemLocalizable(item: commentItem)
         debugPrint("[\(id)] Localizing text...")
         if let textDeformatted = newLocalizableItem.textDeformatted() {
-            newLocalizableItem.textLocalized = try await translator
-                .translate(textDeformatted)
+            newLocalizableItem.textLocalized = try await translateText(
+                textDeformatted,
+                translator: translator,
+                translationService: translationService)
         } else {
-            newLocalizableItem.textLocalized = try await translator
-                .translate(commentItem.text ?? "")
+            newLocalizableItem.textLocalized = try await translateText(
+                commentItem.text ?? "",
+                translator: translator,
+                translationService: translationService)
         }
         newLocalizableItem.cacheDate = Date()
         cache(newItem: newLocalizableItem)
         return newLocalizableItem
     }
+
+    // MARK: - Nested Comment Tree Fetching
+
+    func fetchCommentTree(ids: [Int],
+                          depth: Int = 0,
+                          translator: Translator,
+                          translationService: Int = 0,
+                          fetchFreshComment: Bool = false,
+                          commentFetchedAction: @escaping () -> Void) async -> [FlatComment] {
+        let fetchedComments = await withTaskGroup(of: (Int, HNItemLocalizable?).self,
+                                      returning: [Int: HNItemLocalizable].self) { group in
+            var results = [Int: HNItemLocalizable]()
+            for id in ids {
+                group.addTask(priority: .high) {
+                    do {
+                        return (id, try await self.comment(id: id,
+                                                           translator: translator,
+                                                           translationService: translationService,
+                                                           fetchFreshComment: fetchFreshComment))
+                    } catch {
+                        debugPrint(error.localizedDescription)
+                        return (id, nil)
+                    }
+                }
+            }
+            for await result in group {
+                if let comment = result.1 {
+                    results[result.0] = comment
+                }
+            }
+            return results
+        }
+
+        var result = [FlatComment]()
+        for id in ids {
+            guard let comment = fetchedComments[id] else { continue }
+            commentFetchedAction()
+            result.append(FlatComment(comment: comment, depth: depth))
+            if let kids = comment.item.kids, !kids.isEmpty {
+                let children = await fetchCommentTree(ids: kids,
+                                                      depth: depth + 1,
+                                                      translator: translator,
+                                                      translationService: translationService,
+                                                      fetchFreshComment: fetchFreshComment,
+                                                      commentFetchedAction: commentFetchedAction)
+                result.append(contentsOf: children)
+            }
+        }
+        if depth == 0 {
+            saveCache()
+        }
+        return result
+    }
+
+    // MARK: - Apple Translation
+
+    func translateText(_ text: String, translator: Translator, translationService: Int) async throws -> String {
+        #if canImport(Translation)
+        if translationService == 1 {
+            if #available(iOS 18.0, *) {
+                if let result = try await translateWithApple(text) {
+                    return result
+                }
+            }
+        }
+        #endif
+        return try await translator.translate(text)
+    }
+
+    #if canImport(Translation)
+    @available(iOS 18.0, *)
+    private func translateWithApple(_ text: String) async throws -> String? {
+        let config = TranslationSession.Configuration(
+            source: Locale.Language(identifier: "en"),
+            target: Locale.Language(identifier: "ja")
+        )
+        let session = TranslationSession(configuration: config)
+        let response = try await session.translate(text)
+        return response.targetText
+    }
+    #endif
+
+    // MARK: - Cache
 
     func usedCacheSpace() -> Int {
         return cacheInMemory.count

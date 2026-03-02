@@ -15,8 +15,9 @@ struct ListRow: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 16.0) {
-            Image(image)
-                .resizable()
+            Image(systemName: image)
+                .font(.system(size: 20))
+                .foregroundStyle(.accent)
                 .frame(width: 30.0, height: 30.0)
             VStack(alignment: .leading, spacing: 2.0) {
                 Text(NSLocalizedString(title, comment: ""))
