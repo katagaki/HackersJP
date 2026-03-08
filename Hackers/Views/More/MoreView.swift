@@ -25,12 +25,10 @@ struct MoreView: View {
                         Text("展示")
                             .tag(2)
                     } label: {
-                        ListRow(image: "house",
-                                title: "デフォルトタブ")
+                        ListRow(title: "デフォルトタブ")
                     }
                     NavigationLink(value: ViewPath.moreCache) {
-                        ListRow(image: "internaldrive",
-                                title: "キャッシュ管理")
+                        ListRow(title: "キャッシュ管理")
                     }
                 } header: {
                     ListSectionHeader(text: "一般")
@@ -45,8 +43,7 @@ struct MoreView: View {
                         Text("ベスト")
                             .tag(HNStoryType.best)
                     } label: {
-                        ListRow(image: "arrow.up.arrow.down",
-                                title: "並べ替え")
+                        ListRow(title: "並べ替え")
                     }
                     Picker(selection: $settings.pageStoryCount) {
                         Text("10件")
@@ -56,8 +53,7 @@ struct MoreView: View {
                         Text("30件")
                             .tag(30)
                     } label: {
-                        ListRow(image: "list.number",
-                                title: "ページの記事数")
+                        ListRow(title: "ページの記事数")
                     }
                 } header: {
                     ListSectionHeader(text: "フィード")
@@ -70,8 +66,7 @@ struct MoreView: View {
                         Text("Apple翻訳")
                             .tag(1)
                     } label: {
-                        ListRow(image: "translate",
-                                title: "翻訳サービス",
+                        ListRow(title: "翻訳サービス",
                                 subtitle: settings.translationService == 0 ?
                                     "Google ML Kitで翻訳されます。" :
                                     "Appleの翻訳で翻訳されます。")
@@ -82,8 +77,7 @@ struct MoreView: View {
                         Text("英語")
                             .tag(1)
                     } label: {
-                        ListRow(image: "textformat",
-                                title: "タイトルおよび内容",
+                        ListRow(title: "タイトルおよび内容",
                                 subtitle: settings.titleLanguage == 0 ? "オフラインで翻訳されます。" : "英語の原文で表示されます。")
                     }
                     Picker(selection: $settings.commentLanguage) {
@@ -92,8 +86,7 @@ struct MoreView: View {
                         Text("英語")
                             .tag(1)
                     } label: {
-                        ListRow(image: "text.bubble",
-                                title: "コメント",
+                        ListRow(title: "コメント",
                                 subtitle: settings.commentLanguage == 0 ? "オフラインで翻訳されます。" : "英語の原文で表示されます。")
                     }
                     Picker(selection: $settings.linkLanguage) {
@@ -102,8 +95,7 @@ struct MoreView: View {
                         Text("英語")
                             .tag(1)
                     } label: {
-                        ListRow(image: "newspaper",
-                                title: "記事",
+                        ListRow(title: "記事",
                                 subtitle: settings.linkLanguage == 0 ? "翻訳されたページを開きます。" : "元の記事を開きます。")
                     }
                 } header: {

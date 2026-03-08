@@ -60,6 +60,6 @@ struct CacheView: View {
         let formatter = ByteCountFormatter()
         formatter.allowedUnits = [.useKB, .useMB]
         formatter.countStyle = .file
-        return formatter.string(fromByteCount: Int64(stories.usedCacheSpace()))
+        return formatter.string(fromByteCount: stories.usedCacheSpace())
     }
 }

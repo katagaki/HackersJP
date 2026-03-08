@@ -98,7 +98,9 @@ struct StoriesView: View {
     func refreshStories(forPage page: Int, useCache: Bool = true) async {
         let currentStartingIndex = page * settings.pageStoryCount
         let lastPageToFetch = min(storyIDs.count, currentStartingIndex + settings.pageStoryCount)
+        #if DEBUG
         debugPrint("Loading stories from index \(currentStartingIndex) to \(lastPageToFetch)...")
+        #endif
         let idsToFetch = Array(storyIDs[currentStartingIndex..<lastPageToFetch])
         setFooter("記事内容を読み込み中…", .progress, 0, idsToFetch.count)
         let newlyFetchedStories = await stories.fetchStories(ids: idsToFetch,

@@ -1,5 +1,5 @@
 {
-  "originHash" : "c1abe06ef9bca6b6ec6f49b636c290ebddbc4244786e5e85cd0f331ce4e65243",
+  "originHash" : "bbc3a297aaf182ad215602c3e7f64703954a2f283c0aea8568443988e56fceb3",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -29,21 +29,12 @@
       }
     },
     {
-      "identity" : "lrucache",
+      "identity" : "sqlite.swift",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/nicklockwood/LRUCache.git",
+      "location" : "https://github.com/stephencelis/SQLite.swift.git",
       "state" : {
-        "revision" : "cb5b2bd0da83ad29c0bec762d39f41c8ad0eaf3e",
-        "version" : "1.2.1"
-      }
-    },
-    {
-      "identity" : "swift-atomics",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-atomics.git",
-      "state" : {
-        "revision" : "b601256eab081c0f92f059e12818ac1d4f178ff7",
-        "version" : "1.3.0"
+        "revision" : "0c08856385fe24f7b76d8c51842d78a196e8e817",
+        "version" : "0.15.5"
       }
     },
     {
@@ -51,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/scinfu/SwiftSoup.git",
       "state" : {
-        "revision" : "d86f244ed497d48012782e2f59c985a55e77b3f5",
-        "version" : "2.11.3"
+        "revision" : "dba183c96b2da4e4b80bb31b1e2e59cb9542b8fc",
+        "version" : "2.13.0"
       }
     }
   ],
