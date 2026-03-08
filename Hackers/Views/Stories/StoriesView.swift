@@ -203,14 +203,14 @@ struct StoriesView: View {
         .toolbar {
             if #available(iOS 26.0, *) {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    if settings.titleLanguage == 0 {
+                    if settings.translationService == 0 && settings.titleLanguage == 0 {
                         Image("TranslateBanner")
                     }
                 }
                 .sharedBackgroundVisibility(.hidden)
             } else {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    if settings.titleLanguage == 0 {
+                    if settings.translationService == 0 && settings.titleLanguage == 0 {
                         Image("TranslateBanner")
                     }
                 }
