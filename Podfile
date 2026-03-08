@@ -1,4 +1,4 @@
-platform :ios, '16.0'
+platform :ios, '18.0'
 use_frameworks!
 
 target 'Hackers' do
@@ -10,7 +10,7 @@ post_install do |installer|
         target.build_configurations.each do |config|
 
           # Set build settings
-          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '17.0'
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '18.0'
 
           # Fix DT_TOOLCHAIN_DIR error
           xcconfig_path = config.base_configuration_reference.real_path
