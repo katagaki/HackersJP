@@ -48,7 +48,7 @@ struct StoriesView: View {
             .sheet(item: $selectedStory, onDismiss: {
                 selectedStory = nil
             }, content: { story in
-                if settings.linkLanguage == 0 {
+                if settings.linkLanguage == 0 && settings.translationService == 0 {
                     SafariView(url: URL(string: story.urlTranslated())!)
                         .ignoresSafeArea()
                 } else {
@@ -98,11 +98,14 @@ struct StoriesView: View {
     func refreshStories(forPage page: Int, useCache: Bool = true) async {
         let currentStartingIndex = page * settings.pageStoryCount
         let lastPageToFetch = min(storyIDs.count, currentStartingIndex + settings.pageStoryCount)
+        #if DEBUG
         debugPrint("Loading stories from index \(currentStartingIndex) to \(lastPageToFetch)...")
+        #endif
         let idsToFetch = Array(storyIDs[currentStartingIndex..<lastPageToFetch])
         setFooter("記事内容を読み込み中…", .progress, 0, idsToFetch.count)
         let newlyFetchedStories = await stories.fetchStories(ids: idsToFetch,
                                                              translator: translator,
+                                                             translationService: settings.translationService,
                                                              fetchFreshStory: !useCache) {
             footerCurrent += 1
         }
@@ -110,9 +113,11 @@ struct StoriesView: View {
     }
 
     func downloadTranslationModel() async throws {
-        setFooter("翻訳用リソースをダウンロード中…", .progress, 0, 1)
-        try await translator.downloadModelIfNeeded()
-        setFooter("翻訳用リソースをダウンロード中…", .progress, 1, 1)
+        if settings.translationService == 0 {
+            setFooter("翻訳用リソースをダウンロード中…", .progress, 0, 1)
+            try await translator.downloadModelIfNeeded()
+            setFooter("翻訳用リソースをダウンロード中…", .progress, 1, 1)
+        }
     }
 
     func setFooter(_ text: String, _ mode: FooterDisplayMode, _ current: Int, _ total: Int) {

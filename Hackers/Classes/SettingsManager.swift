@@ -19,6 +19,7 @@ class SettingsManager: ObservableObject {
     @Published var titleLanguage: Int = 0
     @Published var linkLanguage: Int = 0
     @Published var commentLanguage: Int = 0
+    @Published var translationService: Int = 0
 
     init() {
         // Detect if version changed
@@ -47,6 +48,9 @@ class SettingsManager: ObservableObject {
         if defaults.value(forKey: "CommentLanguage") == nil {
             defaults.setValue(0, forKey: "CommentLanguage")
         }
+        if defaults.value(forKey: "TranslationService") == nil {
+            defaults.setValue(0, forKey: "TranslationService")
+        }
 
         // Load configuration into global variables
         startupTab = defaults.integer(forKey: "StartupTab")
@@ -56,6 +60,7 @@ class SettingsManager: ObservableObject {
         titleLanguage = defaults.integer(forKey: "TitleLanguage")
         linkLanguage = defaults.integer(forKey: "LinkLanguage")
         commentLanguage = defaults.integer(forKey: "CommentLanguage")
+        translationService = defaults.integer(forKey: "TranslationService")
     }
 
     func set(_ value: Any?, forKey key: String) {
@@ -90,6 +95,11 @@ class SettingsManager: ObservableObject {
     func setCommentLanguage(_ newValue: Int) {
         defaults.set(newValue, forKey: "CommentLanguage")
         commentLanguage = newValue
+    }
+
+    func setTranslationService(_ newValue: Int) {
+        defaults.set(newValue, forKey: "TranslationService")
+        translationService = newValue
     }
 
 }

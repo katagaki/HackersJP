@@ -11,11 +11,7 @@ import UIKit
 
 struct HNItemLocalizable: Identifiable, Equatable, Hashable, Codable {
 
-    var id: Int {
-        get {
-            return item.id
-        }
-    }
+    var id: Int { item.id }
 
     var item: HNItem
 
@@ -66,7 +62,9 @@ struct HNItemLocalizable: Identifiable, Equatable, Hashable, Codable {
                 return try doc.text().replacingOccurrences(of: "\\n", with: "\n")
             }
         } catch {
+            #if DEBUG
             debugPrint(error.localizedDescription)
+            #endif
         }
         return nil
     }

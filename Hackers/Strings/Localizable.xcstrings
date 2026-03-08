@@ -47,6 +47,12 @@
         }
       }
     },
+    "Apple翻訳" : {
+
+    },
+    "Google翻訳" : {
+
+    },
     "Xでポスト" : {
       "extractionState" : "manual",
       "localizations" : {

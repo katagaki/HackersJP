@@ -20,11 +20,32 @@ struct StoryView: View {
 
     @State var state: ViewState = .initialized
     @State var story: HNItemLocalizable
-    @State var comments: [HNItemLocalizable] = []
+    @State var comments: [FlatComment] = []
+    @State var collapsedCommentIDs: Set<Int> = []
     @State var footerMode: FooterDisplayMode = .progress
     @State var footerCurrent: Int = 0
     @State var footerTotal: Int = 0
     @State var isSafariViewControllerPresenting: Bool = false
+
+    var visibleComments: [FlatComment] {
+        var result = [FlatComment]()
+        var skipUntilDepth: Int?
+
+        for comment in comments {
+            if let skipDepth = skipUntilDepth {
+                if comment.depth <= skipDepth {
+                    skipUntilDepth = nil
+                } else {
+                    continue
+                }
+            }
+            result.append(comment)
+            if collapsedCommentIDs.contains(comment.id) {
+                skipUntilDepth = comment.depth
+            }
+        }
+        return result
+    }
 
     var body: some View {
         List {
@@ -104,8 +125,23 @@ struct StoryView: View {
             .padding([.top, .bottom], 8.0)
             .listRowInsets(EdgeInsets())
             if state == .readyForInteraction {
-                ForEach(comments, id: \.id) { comment in
-                    CommentItemRow(comment: comment)
+                ForEach(visibleComments) { flatComment in
+                    let hasChildren = flatComment.comment.item.kids?.isEmpty == false
+                    CommentItemRow(
+                        comment: flatComment.comment,
+                        depth: flatComment.depth,
+                        isCollapsed: collapsedCommentIDs.contains(flatComment.id),
+                        hasChildren: hasChildren,
+                        onTap: hasChildren ? {
+                            withAnimation {
+                                if collapsedCommentIDs.contains(flatComment.id) {
+                                    collapsedCommentIDs.remove(flatComment.id)
+                                } else {
+                                    collapsedCommentIDs.insert(flatComment.id)
+                                }
+                            }
+                        } : nil
+                    )
                 }
             } else {
                 ListFooter(footerMode: $footerMode,
@@ -143,7 +179,7 @@ struct StoryView: View {
             }
         }
         .sheet(isPresented: $isSafariViewControllerPresenting) {
-            if settings.linkLanguage == 0 {
+            if settings.linkLanguage == 0 && settings.translationService == 0 {
                 SafariView(url: URL(string: story.urlTranslated())!)
                     .ignoresSafeArea()
             } else {
@@ -157,11 +193,15 @@ struct StoryView: View {
 
     func refreshComments(useCache: Bool = true) async {
         if let commentItems = story.item.kids {
-            footerTotal = commentItems.count
-            comments = await stories.fetchComments(ids: commentItems,
-                                                   translator: translator) {
-                footerCurrent += 1
-            }
+            footerTotal = story.item.descendants ?? commentItems.count
+            comments = await stories.fetchCommentTree(
+                ids: commentItems,
+                translator: translator,
+                translationService: settings.translationService,
+                fetchFreshComment: !useCache,
+                commentFetchedAction: {
+                    footerCurrent += 1
+                })
         }
     }
 }
