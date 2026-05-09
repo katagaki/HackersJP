@@ -142,6 +142,8 @@ struct StoryView: View {
                             }
                         } : nil
                     )
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
                 }
             } else {
                 ListFooter(footerMode: $footerMode,

@@ -33,33 +33,39 @@ struct CommentItemRow: View {
                 }
                 .padding(.trailing, 6)
             }
-            VStack(alignment: .leading, spacing: 2.0) {
-                HStack(alignment: .center, spacing: 4.0) {
-                    Text(comment.item.by)
-                    Divider()
-                    Text(Date(timeIntervalSince1970: TimeInterval(comment.item.time)),
-                         style: .relative)
-                    if hasChildren {
-                        Spacer()
-                        Image(systemName: isCollapsed ? "chevron.forward" : "chevron.down")
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
+            VStack(alignment: .leading, spacing: 0.0) {
+                VStack(alignment: .leading, spacing: 2.0) {
+                    HStack(alignment: .center, spacing: 4.0) {
+                        Text(comment.item.by)
+                        Divider()
+                        Text(Date(timeIntervalSince1970: TimeInterval(comment.item.time)),
+                             style: .relative)
+                        if hasChildren {
+                            Spacer()
+                            Image(systemName: isCollapsed ? "chevron.forward" : "chevron.down")
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                    .font(.caption)
+                    .lineLimit(1)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    if !isCollapsed {
+                        Text((settings.commentLanguage == 0 ?
+                              comment.textLocalized : comment.textDeformatted() ??
+                              comment.item.text) ?? "")
+                        .font(.subheadline)
+                        .layoutPriority(1)
+                        .textSelection(.enabled)
                     }
                 }
-                .font(.caption)
-                .lineLimit(1)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-                if !isCollapsed {
-                    Text((settings.commentLanguage == 0 ?
-                          comment.textLocalized : comment.textDeformatted() ??
-                          comment.item.text) ?? "")
-                    .font(.subheadline)
-                    .layoutPriority(1)
-                    .textSelection(.enabled)
-                }
+                .padding(.vertical, 8.0)
+                .padding(.trailing, 16.0)
+                Divider()
             }
         }
+        .padding(.leading, 16.0)
         .contentShape(Rectangle())
         .onTapGesture {
             onTap?()
