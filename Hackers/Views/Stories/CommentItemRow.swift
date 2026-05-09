@@ -24,7 +24,7 @@ struct CommentItemRow: View {
     var body: some View {
         HStack(spacing: 0) {
             if depth > 0 {
-                HStack(spacing: 0) {
+                HStack(spacing: 2) {
                     ForEach(0..<depth, id: \.self) { level in
                         Rectangle()
                             .fill(depthColors[level % depthColors.count])

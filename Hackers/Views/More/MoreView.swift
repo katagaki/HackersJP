@@ -50,7 +50,6 @@ struct MoreView: View {
                 settings.setTranslationService(newValue)
             }
             .navigationTitle("ViewTitle.More")
-            .navigationBarTitleDisplayMode(.inline)
         }
     }
 
