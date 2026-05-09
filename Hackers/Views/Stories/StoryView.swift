@@ -152,6 +152,7 @@ struct StoryView: View {
             }
         }
         .listStyle(.plain)
+        .hackersBackground()
         .task {
             if state == .initialized {
                 state = .loadingInitialData

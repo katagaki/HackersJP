@@ -53,6 +53,7 @@ struct CacheView: View {
                     .font(.body)
             }
         }
+        .hackersBackground()
         .navigationTitle("キャッシュ管理")
     }
 

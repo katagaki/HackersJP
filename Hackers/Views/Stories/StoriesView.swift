@@ -192,6 +192,7 @@ struct StoriesView: View {
             }
         }
         .listStyle(.plain)
+        .hackersBackground()
         .navigationDestination(for: HNItemLocalizable.self, destination: { story in
             StoryView(story: story)
         })

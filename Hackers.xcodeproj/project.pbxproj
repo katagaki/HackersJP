@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -11,7 +11,6 @@
 		E4163D422F5D09A900708895 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = E4163D412F5D09A900708895 /* SQLite */; };
 		E477E7202A95D55A00517B72 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = E477E71F2A95D55A00517B72 /* Alamofire */; };
 		E477E7252A95E33E00517B72 /* FaviconFinder in Frameworks */ = {isa = PBXBuildFile; productRef = E477E7242A95E33E00517B72 /* FaviconFinder */; };
-		E4896D442D7BF20A00F9B22F /* Komponents in Frameworks */ = {isa = PBXBuildFile; productRef = E4896D432D7BF20A00F9B22F /* Komponents */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,7 +22,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		E4163D372F5D058E00708895 /* Exceptions for "Hackers" folder in "Hackers" target */ = {
+		E4163D372F5D058E00708895 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -33,18 +32,7 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		E4163D192F5D058E00708895 /* Hackers */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				E4163D372F5D058E00708895 /* Exceptions for "Hackers" folder in "Hackers" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = Hackers;
-			sourceTree = "<group>";
-		};
+		E4163D192F5D058E00708895 /* Hackers */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (E4163D372F5D058E00708895 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Hackers; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,7 +41,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				E4163D422F5D09A900708895 /* SQLite in Frameworks */,
-				E4896D442D7BF20A00F9B22F /* Komponents in Frameworks */,
 				E477E7252A95E33E00517B72 /* FaviconFinder in Frameworks */,
 				E477E7202A95D55A00517B72 /* Alamofire in Frameworks */,
 				681D07F500846733B18A2A18 /* Pods_Hackers.framework in Frameworks */,
@@ -125,7 +112,6 @@
 			packageProductDependencies = (
 				E477E71F2A95D55A00517B72 /* Alamofire */,
 				E477E7242A95E33E00517B72 /* FaviconFinder */,
-				E4896D432D7BF20A00F9B22F /* Komponents */,
 				E4163D412F5D09A900708895 /* SQLite */,
 			);
 			productName = Hackers;
@@ -140,7 +126,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 2630;
+				LastUpgradeCheck = 2640;
 				TargetAttributes = {
 					E46652B32A9463CB0048BA05 = {
 						CreatedOnToolsVersion = 15.0;
@@ -160,7 +146,6 @@
 			packageReferences = (
 				E477E71E2A95D55900517B72 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				E477E7232A95E33E00517B72 /* XCRemoteSwiftPackageReference "FaviconFinder" */,
-				E4896D422D7BF20A00F9B22F /* XCRemoteSwiftPackageReference "Komponents" */,
 				E4163D402F5D09A900708895 /* XCRemoteSwiftPackageReference "SQLite.swift" */,
 			);
 			productRefGroup = E46652B52A9463CB0048BA05 /* Products */;
@@ -213,9 +198,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Hackers/Pods-Hackers-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Hackers/Pods-Hackers-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -248,9 +237,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Hackers/Pods-Hackers-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Hackers/Pods-Hackers-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -328,7 +321,6 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				ONLY_ACTIVE_ARCH = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -427,7 +419,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.3;
+				MARKETING_VERSION = 1.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tsubuzaki.Hackers;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -473,7 +465,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.3;
+				MARKETING_VERSION = 1.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tsubuzaki.Hackers;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -532,14 +524,6 @@
 				minimumVersion = 4.2.0;
 			};
 		};
-		E4896D422D7BF20A00F9B22F /* XCRemoteSwiftPackageReference "Komponents" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/katagaki/Komponents";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -557,11 +541,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E477E7232A95E33E00517B72 /* XCRemoteSwiftPackageReference "FaviconFinder" */;
 			productName = FaviconFinder;
-		};
-		E4896D432D7BF20A00F9B22F /* Komponents */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = E4896D422D7BF20A00F9B22F /* XCRemoteSwiftPackageReference "Komponents" */;
-			productName = Komponents;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

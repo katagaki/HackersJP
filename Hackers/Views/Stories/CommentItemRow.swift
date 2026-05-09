@@ -24,12 +24,14 @@ struct CommentItemRow: View {
     var body: some View {
         HStack(spacing: 0) {
             if depth > 0 {
-                ForEach(0..<depth, id: \.self) { level in
-                    Rectangle()
-                        .fill(depthColors[level % depthColors.count])
-                        .frame(width: 2)
-                        .padding(.trailing, 6)
+                HStack(spacing: 0) {
+                    ForEach(0..<depth, id: \.self) { level in
+                        Rectangle()
+                            .fill(depthColors[level % depthColors.count])
+                            .frame(width: 2)
+                    }
                 }
+                .padding(.trailing, 6)
             }
             VStack(alignment: .leading, spacing: 2.0) {
                 HStack(alignment: .center, spacing: 4.0) {
