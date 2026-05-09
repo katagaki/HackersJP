@@ -1,12 +1,21 @@
 {
   "fill" : {
-    "automatic-gradient" : "srgb:1.00000,0.47286,0.02909,1.00000"
+    "automatic-gradient" : "srgb:1.00000,0.47451,0.02745,1.00000"
   },
   "groups" : [
     {
       "blur-material" : 0.5,
       "layers" : [
         {
+          "fill-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : {
+                "automatic-gradient" : "srgb:1.00000,0.47451,0.02745,1.00000"
+              }
+            }
+          ],
+          "glass" : true,
           "image-name" : "Hackers.002.png",
           "name" : "Y"
         }
